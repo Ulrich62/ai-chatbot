@@ -1,0 +1,219 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+Pour rédiger un cahier des charges technique détaillé permettant de reprendre l’application from scratch, en remplaçant Recoil par Zustand pour la gestion d’état, il faut :
+
+1. **Lister et décrire toutes les fonctionnalités métier et UI de l’app**  
+2. **Détailler l’architecture technique cible (front, gestion d’état, navigation, etc.)**  
+3. **Spécifier les choix techniques (librairies, patterns, structure des dossiers, etc.)**  
+4. **Donner des exemples de structure de store Zustand**  
+5. **Prévoir les points d’intégration (API, assets, etc.)**  
+6. **Lister les tests et outils de qualité**  
+
+---
+
+## 1. Fonctionnalités Métier & UI
+
+### Authentification
+- **Inscription / Connexion** (email, mot de passe, éventuellement OAuth)
+- **Gestion du token JWT** (stockage sécurisé, rafraîchissement)
+- **Déconnexion**
+- **Mot de passe oublié**
+
+### Navigation
+- **Navigation principale** (Drawer, Tab, Stack)
+- **Navigation conditionnelle** (auth/non-auth)
+- **Deep linking** (si besoin)
+
+### Chat
+- **Liste des conversations**
+- **Affichage d’une conversation**
+- **Envoi/réception de messages (texte, images, fichiers)**
+- **Notifications en temps réel (WebSocket ou polling)**
+- **Gestion des états de lecture**
+
+### Historique
+- **Consultation de l’historique des actions/messages**
+- **Filtrage, recherche**
+
+### UI Générique
+- **Thématisation (dark/light)**
+- **Composants UI réutilisables (boutons, inputs, modals, etc.)**
+- **Gestion des erreurs et des loaders**
+
+---
+
+## 2. Architecture Technique
+
+### Frontend
+- **React Native** (Expo ou bare workflow)
+- **TypeScript** pour la robustesse
+- **Zustand** pour la gestion d’état globale
+- **React Navigation** pour la navigation
+- **Axios** pour les appels API
+- **Jest + Testing Library** pour les tests
+
+### Structure des dossiers (exemple)
+```
+/app
+  /(auth)         // écrans auth
+  /(root)         // écrans principaux
+    /chat
+    /history
+/components
+  /ui             // composants génériques
+  /chat           // composants spécifiques
+/store            // stores Zustand
+/apis             // appels API
+/hooks            // hooks custom
+/utils            // utilitaires
+/constants        // constantes globales
+/assets           // images, icônes, polices
+/locales          // i18n
+```
+
+---
+
+## 3. Spécifications Techniques
+
+### Gestion d’état avec Zustand
+
+- **Stores modulaires** (un store par domaine : auth, chat, UI, etc.)
+- **Selectors** pour optimiser les re-render
+- **Persistence** (middleware Zustand pour stocker dans AsyncStorage)
+- **Actions pures** (pas de logique métier dans les composants)
+- **Exemple de store** :
+
+```ts
+// store/auth.ts
+import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
+
+type AuthState = {
+  user: User | null
+  token: string | null
+  login: (email: string, password: string) => Promise<void>
+  logout: () => void
+}
+
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set) => ({
+      user: null,
+      token: null,
+      login: async (email, password) => {
+        // appel API, set user/token
+      },
+      logout: () => set({ user: null, token: null }),
+    }),
+    { name: 'auth' }
+  )
+)
+```
+
+### Navigation
+
+- **React Navigation** (Stack, Drawer, Tab)
+- **Navigation conditionnelle selon l’état auth**
+- **Paramétrage des routes dynamiques (chatId, etc.)**
+
+### Appels API
+
+- **Axios** avec instance configurée (baseURL, interceptors pour token)
+- **Gestion centralisée des erreurs**
+- **Types de réponses API (TypeScript)**
+
+### UI
+
+- **Composants réutilisables (Button, Input, Modal, etc.)**
+- **Thématisation via context/provider ou Zustand**
+- **Gestion des loaders et erreurs globales**
+
+### Notifications
+
+- **WebSocket (ex: socket.io-client) pour le chat**
+- **Gestion de la reconnexion**
+- **Mise à jour du store en temps réel**
+
+### Internationalisation
+
+- **i18next** ou équivalent
+- **Chargement dynamique des traductions**
+
+---
+
+## 4. Points d’intégration
+
+- **API REST/GraphQL** (spécifier endpoints, payloads, erreurs)
+- **WebSocket pour le chat**
+- **Assets (images, icônes, polices)**
+- **Stockage local (AsyncStorage pour tokens, préférences, etc.)**
+
+---
+
+## 5. Qualité & Tests
+
+- **Tests unitaires (Jest)**
+- **Tests d’intégration (Testing Library)**
+- **Linting (ESLint, Prettier)**
+- **Type-checking (TypeScript strict)**
+- **CI/CD (GitHub Actions, etc.)**
+
+---
+
+## 6. Exemples de stores Zustand
+
+- **/store/auth.ts** : gestion de l’utilisateur, token, login/logout
+- **/store/chat.ts** : liste des conversations, messages, actions d’envoi/réception
+- **/store/ui.ts** : état global UI (modals, loaders, thèmes)
+- **/store/history.ts** : historique des actions/messages
+
+---
+
+## 7. Points d’attention spécifiques à Zustand
+
+- **Pas de selectors globaux** : utiliser des selectors pour éviter les re-render inutiles
+- **Pas de hooks custom pour chaque action** : regrouper les actions dans le store
+- **Utiliser les middlewares (persist, immer, devtools) selon les besoins**
+- **Bien typer les stores pour la DX**
+
+---
+
+## 8. Exemple de flux utilisateur
+
+1. **Lancement de l’app** : vérification du token (store auth, persisté)
+2. **Connexion** : appel API, stockage user/token dans Zustand (persisté)
+3. **Navigation** : accès aux écrans principaux si auth OK
+4. **Chat** : affichage des conversations, ouverture d’un chat, envoi/réception de messages via WebSocket, mise à jour du store chat
+5. **Déconnexion** : reset du store auth, retour à l’écran de login
+
+---
+
+## 9. Stack technique recommandée
+
+- **React Native (Expo)**
+- **TypeScript**
+- **Zustand (gestion d’état)**
+- **React Navigation**
+- **Axios**
+- **Jest, Testing Library**
+- **i18next**
+- **AsyncStorage**
+- **socket.io-client (si WebSocket)**
+
+---
+
+## 10. Documentation & onboarding
+
+- **README** : explication de la structure, des stores, des patterns
+- **Exemples d’utilisation des stores**
+- **Convention de nommage et d’organisation des fichiers**
+
+---
+
+### **Conclusion**
+
+Ce cahier des charges technique permet de repartir l’app from scratch, en remplaçant Recoil par Zustand, avec une architecture moderne, scalable et testable.  
+Si tu veux un exemple de code pour chaque store ou un template de structure de projet, précise-le !
