@@ -1,66 +1,55 @@
-import type { UIMessage } from 'ai';
 import { PreviewMessage, ThinkingMessage } from './message';
 import { Greeting } from './greeting';
-import { memo } from 'react';
-import equal from 'fast-deep-equal';
+import { memo, useEffect } from 'react';
 import type { UseChatHelpers } from '@ai-sdk/react';
 import { motion } from 'framer-motion';
-import { useMessages } from '@/hooks/use-messages';
+import { TEMP_MSG_ID_PREFIX } from '@/constants';
+import { useScrollToBottom } from '@/hooks/use-scroll-to-bottom';
 
 interface MessagesProps {
-  chatId: string;
+  chatId?: string;
   status: UseChatHelpers['status'];
-  messages: Array<UIMessage>;
-  setMessages: UseChatHelpers['setMessages'];
-  reload: UseChatHelpers['reload'];
-  isReadonly: boolean;
-  isArtifactVisible: boolean;
+  messages: Array<Message>;
+  loading?: boolean;
 }
 
-function PureMessages({
-  chatId,
-  status,
-  messages,
-  setMessages,
-  reload,
-  isReadonly,
-}: MessagesProps) {
+function PureMessages({ chatId, status, messages, loading }: MessagesProps) {
   const {
     containerRef: messagesContainerRef,
     endRef: messagesEndRef,
     onViewportEnter,
     onViewportLeave,
-    hasSentMessage,
-  } = useMessages({
-    chatId,
-    status,
-  });
+    scrollToBottom,
+  } = useScrollToBottom();
+
+  useEffect(() => {
+    if (chatId) {
+      scrollToBottom('instant');
+    }
+  }, [chatId, scrollToBottom]);
+
+  const hasSentMessage = messages?.length > 0;
+  const lastMessage = messages?.[messages.length - 1];
 
   return (
     <div
       ref={messagesContainerRef}
       className="flex flex-col min-w-0 gap-6 flex-1 overflow-y-scroll pt-4 relative"
     >
-      {messages.length === 0 && <Greeting />}
+      {!hasSentMessage && !loading && <Greeting />}
 
-      {messages.map((message, index) => (
+      {messages?.map((message, index) => (
         <PreviewMessage
           key={message.id}
-          chatId={chatId}
           message={message}
-          isLoading={status === 'streaming' && messages.length - 1 === index}
-          setMessages={setMessages}
-          reload={reload}
-          isReadonly={isReadonly}
           requiresScrollPadding={
             hasSentMessage && index === messages.length - 1
           }
         />
       ))}
 
-      {status === 'submitted' &&
-        messages.length > 0 &&
-        messages[messages.length - 1].role === 'user' && <ThinkingMessage />}
+      {messages?.length > 0 &&
+        lastMessage?.id.startsWith(TEMP_MSG_ID_PREFIX) && <ThinkingMessage />}
 
       <motion.div
         ref={messagesEndRef}
@@ -71,14 +60,4 @@ function PureMessages({
     </div>
   );
 }
-export const Messages = memo(PureMessages, (prevProps, nextProps) => {
-  if (prevProps.isArtifactVisible && nextProps.isArtifactVisible) return true;
-
-  if (prevProps.status !== nextProps.status) return false;
-  if (prevProps.status && nextProps.status) return false;
-  if (prevProps.messages.length !== nextProps.messages.length) return false;
-  if (!equal(prevProps.messages, nextProps.messages)) return false;
-
-  return true;
-});
-
+export const Messages = memo(PureMessages);

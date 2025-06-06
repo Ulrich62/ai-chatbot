@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import type { User } from "next-auth";
-import { useRouter } from "next/navigation";
+import type { User } from 'next-auth';
+import { useRouter } from 'next/navigation';
 
-import { PlusIcon } from "@/components/icons";
-import { SidebarHistory } from "@/components/sidebar-history";
-import { SidebarUserNav } from "@/components/sidebar-user-nav";
-import { Button } from "@/components/ui/button";
+import { PlusIcon } from '@/components/icons';
+import { SidebarHistory } from '@/components/sidebar-history';
+import { SidebarUserNav } from '@/components/sidebar-user-nav';
+import { Button } from '@/components/ui/button';
 import {
   Sidebar,
   SidebarContent,
@@ -14,46 +14,52 @@ import {
   SidebarHeader,
   SidebarMenu,
   useSidebar,
-} from "@/components/ui/sidebar";
-import Link from "next/link";
-import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
+} from '@/components/ui/sidebar';
+import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
+import { useMessages } from '@/hooks/use-messages';
 
 export function AppSidebar({ user }: { user: User | undefined }) {
+  const { clearMessages } = useMessages();
+
   const router = useRouter();
   const { setOpenMobile } = useSidebar();
+
+  const handleNewChat = () => {
+    setOpenMobile(false);
+    clearMessages();
+    router.push('/');
+  };
+
+  const handleLogoClick = () => {
+    setOpenMobile(false);
+  };
 
   return (
     <Sidebar className="group-data-[side=left]:border-r-0">
       <SidebarHeader>
         <SidebarMenu>
           <div className="flex flex-row justify-between items-center">
-            <Link
-              href="/"
-              onClick={() => {
-                setOpenMobile(false);
-              }}
+            <button
+              type="button"
+              onClick={handleLogoClick}
               className="flex flex-row gap-3 items-center"
             >
-              <span className="text-lg font-semibold px-2 hover:bg-muted rounded-md cursor-pointer">
-                Chatbot
+              <span className="text-lg font-semibold px-2 hover:bg-muted rounded-md">
+                BGDS Assistant
               </span>
-            </Link>
+            </button>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
                   variant="ghost"
                   type="button"
                   className="p-2 h-fit"
-                  onClick={() => {
-                    setOpenMobile(false);
-                    router.push("/");
-                    router.refresh();
-                  }}
+                  onClick={handleNewChat}
                 >
                   <PlusIcon />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent align="end">New Chat</TooltipContent>
+              <TooltipContent align="end">Nouvelle conversation</TooltipContent>
             </Tooltip>
           </div>
         </SidebarMenu>

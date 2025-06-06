@@ -4,7 +4,7 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import { ThemeProvider } from '@/components/theme-provider';
 
 import './globals.css';
-import { SessionProvider } from 'next-auth/react';
+import { QueryProvider } from '@/providers/QueryProvider';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://chat.vercel.ai'),
@@ -77,8 +77,10 @@ export default async function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <Toaster position="top-center" />
-          <SessionProvider>{children}</SessionProvider>
+          <QueryProvider>
+            <Toaster position="top-center" />
+            {children}
+          </QueryProvider>
         </ThemeProvider>
       </body>
     </html>

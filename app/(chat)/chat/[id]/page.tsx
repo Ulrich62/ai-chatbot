@@ -1,13 +1,13 @@
-import { Chat } from "@/components/chat";
+import { Chat } from '@/components/chat';
 
-const initialMessages = [
-  {
-    id: "1",
-    content: "Hello, how are you?",
-    role: "user",
-  },
-];
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
 
-export default function Page() {
-  return <Chat id="1" initialMessages={initialMessages} />;
+  console.log('render chat');
+
+  return <Chat id={id} />;
 }

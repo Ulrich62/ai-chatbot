@@ -1,45 +1,34 @@
 'use client';
 
-import type { UIMessage } from 'ai';
 import cx from 'classnames';
 import { AnimatePresence, motion } from 'framer-motion';
-import { memo, useState } from 'react';
-import { SparklesIcon } from './icons';
+import { memo } from 'react';
 import { Markdown } from './markdown';
-import { PreviewAttachment } from './preview-attachment';
-import { Weather } from './weather';
 import equal from 'fast-deep-equal';
 import { cn, sanitizeText } from '@/lib/utils';
-import { Button } from './ui/button';
-import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
-import { MessageReasoning } from './message-reasoning';
-import type { UseChatHelpers } from '@ai-sdk/react';
+import { ROLES } from '@/enums';
+import Image from 'next/image';
+import AssistantIcon from '@/assets/icons/bot.svg';
+
+type PurePreviewMessageProps = {
+  message: Message;
+  requiresScrollPadding: boolean;
+};
 
 const PurePreviewMessage = ({
-  chatId,
   message,
-  isLoading,
-  setMessages,
-  reload,
   requiresScrollPadding,
-}: {
-  chatId: string;
-  message: UIMessage;
-  isLoading: boolean;
-  setMessages: UseChatHelpers['setMessages'];
-  reload: UseChatHelpers['reload'];
-  isReadonly: boolean;
-  requiresScrollPadding: boolean;
-}) => {
+}: PurePreviewMessageProps) => {
+  const role = message.is_user ? ROLES.USER : ROLES.ASSISTANT;
 
   return (
     <AnimatePresence>
       <motion.div
-        data-testid={`message-${message.role}`}
+        data-testid={`message-${role}`}
         className="w-full mx-auto max-w-3xl px-4 group/message"
         initial={{ y: 5, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        data-role={message.role}
+        data-role={role}
       >
         <div
           className={cn(
@@ -49,68 +38,24 @@ const PurePreviewMessage = ({
             },
           )}
         >
-          {message.role === 'assistant' && (
-            <div className="size-8 flex items-center rounded-full justify-center ring-1 shrink-0 ring-border bg-background">
-              <div className="translate-y-px">
-                <SparklesIcon size={14} />
-              </div>
-            </div>
-          )}
+          {role === ROLES.ASSISTANT && <AssistantAvatar />}
 
           <div
             className={cn('flex flex-col gap-4 w-full', {
-              'min-h-96': message.role === 'assistant' && requiresScrollPadding,
+              'min-h-96': role === ROLES.ASSISTANT && requiresScrollPadding,
             })}
           >
-            {message.experimental_attachments &&
-              message.experimental_attachments.length > 0 && (
-                <div
-                  data-testid={`message-attachments`}
-                  className="flex flex-row justify-end gap-2"
-                >
-                  {message.experimental_attachments.map((attachment) => (
-                    <PreviewAttachment
-                      key={attachment.url}
-                      attachment={attachment}
-                    />
-                  ))}
-                </div>
-              )}
-
-            {message.parts?.map((part, index) => {
-              const { type } = part;
-              const key = `message-${message.id}-part-${index}`;
-
-              if (type === 'reasoning') {
-                return (
-                  <MessageReasoning
-                    key={key}
-                    isLoading={isLoading}
-                    reasoning={part.reasoning}
-                  />
-                );
-              }
-
-              if (type === 'text') {
-                  return (
-                    <div key={key} className="flex flex-row gap-2 items-start">
-                      <div
-                        data-testid="message-content"
-                        className={cn('flex flex-col gap-4', {
-                          'bg-primary text-primary-foreground px-3 py-2 rounded-xl':
-                            message.role === 'user',
-                        })}
-                      >
-                        <Markdown>{sanitizeText(part.text)}</Markdown>
-                      </div>
-                    </div>
-                  );
-              }
-
-
-            })}
-
-            
+            <div className="flex flex-row gap-2 items-start">
+              <div
+                data-testid="message-content"
+                className={cn('flex flex-col gap-4', {
+                  'bg-primary text-primary-foreground px-3 py-2 rounded-xl':
+                    message.is_user,
+                })}
+              >
+                <Markdown>{sanitizeText(message.content)}</Markdown>
+              </div>
+            </div>
           </div>
         </div>
       </motion.div>
@@ -121,11 +66,11 @@ const PurePreviewMessage = ({
 export const PreviewMessage = memo(
   PurePreviewMessage,
   (prevProps, nextProps) => {
-    if (prevProps.isLoading !== nextProps.isLoading) return false;
     if (prevProps.message.id !== nextProps.message.id) return false;
     if (prevProps.requiresScrollPadding !== nextProps.requiresScrollPadding)
       return false;
-    if (!equal(prevProps.message.parts, nextProps.message.parts)) return false;
+    if (!equal(prevProps.message.content, nextProps.message.content))
+      return false;
 
     return true;
   },
@@ -139,7 +84,7 @@ export const ThinkingMessage = () => {
       data-testid="message-assistant-loading"
       className="w-full mx-auto max-w-3xl px-4 group/message min-h-96"
       initial={{ y: 5, opacity: 0 }}
-      animate={{ y: 0, opacity: 1, transition: { delay: 1 } }}
+      animate={{ y: 0, opacity: 1, transition: { delay: 0.5 } }}
       data-role={role}
     >
       <div
@@ -150,16 +95,22 @@ export const ThinkingMessage = () => {
           },
         )}
       >
-        <div className="size-8 flex items-center rounded-full justify-center ring-1 shrink-0 ring-border">
-          <SparklesIcon size={14} />
-        </div>
+        <AssistantAvatar />
 
         <div className="flex flex-col gap-2 w-full">
           <div className="flex flex-col gap-4 text-muted-foreground">
-            Hmm...
+            En cours de réflexion...
           </div>
         </div>
       </div>
     </motion.div>
+  );
+};
+
+const AssistantAvatar = () => {
+  return (
+    <div className="size-6 flex items-center rounded-full justify-center ring-1 shrink-0 ring-border bg-background">
+      <Image src={AssistantIcon} alt="logo" width={24} height={24} />
+    </div>
   );
 };

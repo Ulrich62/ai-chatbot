@@ -29,6 +29,9 @@ importers:
       '@codemirror/view':
         specifier: ^6.35.3
         version: 6.36.4
+      '@lukemorales/query-key-factory':
+        specifier: ^1.3.4
+        version: 1.3.4(@tanstack/query-core@5.80.6)(@tanstack/react-query@5.80.6(react@19.0.0-rc-45804af1-20241021))
       '@opentelemetry/api':
         specifier: ^1.9.0
         version: 1.9.0
@@ -86,6 +89,9 @@ importers:
       '@react-navigation/stack':
         specifier: ^7.3.3
         version: 7.3.3(@react-navigation/native@7.1.10(react-native@0.79.3(@babel/core@7.27.4)(@types/react@18.3.18)(bufferutil@4.0.9)(react@19.0.0-rc-45804af1-20241021))(react@19.0.0-rc-45804af1-20241021))(react-native-gesture-handler@2.25.0(react-native@0.79.3(@babel/core@7.27.4)(@types/react@18.3.18)(bufferutil@4.0.9)(react@19.0.0-rc-45804af1-20241021))(react@19.0.0-rc-45804af1-20241021))(react-native-safe-area-context@5.4.1(react-native@0.79.3(@babel/core@7.27.4)(@types/react@18.3.18)(bufferutil@4.0.9)(react@19.0.0-rc-45804af1-20241021))(react@19.0.0-rc-45804af1-20241021))(react-native-screens@4.11.1(react-native@0.79.3(@babel/core@7.27.4)(@types/react@18.3.18)(bufferutil@4.0.9)(react@19.0.0-rc-45804af1-20241021))(react@19.0.0-rc-45804af1-20241021))(react-native@0.79.3(@babel/core@7.27.4)(@types/react@18.3.18)(bufferutil@4.0.9)(react@19.0.0-rc-45804af1-20241021))(react@19.0.0-rc-45804af1-20241021)
+      '@tanstack/react-query':
+        specifier: ^5.80.6
+        version: 5.80.6(react@19.0.0-rc-45804af1-20241021)
       '@vercel/analytics':
         specifier: ^1.3.1
         version: 1.5.0(next@15.3.0-canary.31(@babel/core@7.27.4)(@opentelemetry/api@1.9.0)(@playwright/test@1.51.0)(react-dom@19.0.0-rc-45804af1-20241021(react@19.0.0-rc-45804af1-20241021))(react@19.0.0-rc-45804af1-20241021))(react@19.0.0-rc-45804af1-20241021)
@@ -1386,6 +1392,13 @@ packages:
   '@lezer/python@1.1.16':
     resolution: {integrity: sha512-ievIWylIZA5rNgAyHgA06/Y76vMUISKaYL9WrtjU8rCTTEzyZYo2jz9ER2YBdnN6dxCyS7eaK4HJCzamoAMKZw==}
 
+  '@lukemorales/query-key-factory@1.3.4':
+    resolution: {integrity: sha512-A3frRDdkmaNNQi6mxIshsDk4chRXWoXa05US8fBo4kci/H+lVmujS6QrwQLLGIkNIRFGjMqp2uKjC4XsLdydRw==}
+    engines: {node: '>=14'}
+    peerDependencies:
+      '@tanstack/query-core': '>= 4.0.0'
+      '@tanstack/react-query': '>= 4.0.0'
+
   '@marijn/find-cluster-break@1.0.2':
     resolution: {integrity: sha512-l0h88YhZFyKdXIFNfSWpyjStDjGHwZ/U7iobcK1cQQD8sejsONdQtTVU+1wVN1PBw40PiiHB1vA5S7VTfQiP9g==}
 
@@ -2057,6 +2070,14 @@ packages:
     resolution: {integrity: sha512-0wDLwCVF5V3x3b1SGXPCDcdsbDHMBe+lkFzBRaHeLvNi+nrrnZ1lA18u+OTWO8iSWU2GxUOCvlXtDuqftc1oiA==}
     peerDependencies:
       tailwindcss: '>=3.0.0 || insiders || >=4.0.0-alpha.20 || >=4.0.0-beta.1'
+
+  '@tanstack/query-core@5.80.6':
+    resolution: {integrity: sha512-nl7YxT/TAU+VTf+e2zTkObGTyY8YZBMnbgeA1ee66lIVqzKlYursAII6z5t0e6rXgwUMJSV4dshBTNacNpZHbQ==}
+
+  '@tanstack/react-query@5.80.6':
+    resolution: {integrity: sha512-izX+5CnkpON3NQGcEm3/d7LfFQNo9ZpFtX2QsINgCYK9LT2VCIdi8D3bMaMSNhrAJCznRoAkFic76uvLroALBw==}
+    peerDependencies:
+      react: ^18 || ^19
 
   '@types/babel__core@7.20.5':
     resolution: {integrity: sha512-qoQprZvz5wQFJwMDqeseRXWv3rqMvhgpbXFfVyWhbx9X47POIA6i/+dXefEmZKoAgOaTdaIgNSMqMIU61yRyzA==}
@@ -6396,6 +6417,11 @@ snapshots:
       '@lezer/highlight': 1.2.1
       '@lezer/lr': 1.4.2
 
+  '@lukemorales/query-key-factory@1.3.4(@tanstack/query-core@5.80.6)(@tanstack/react-query@5.80.6(react@19.0.0-rc-45804af1-20241021))':
+    dependencies:
+      '@tanstack/query-core': 5.80.6
+      '@tanstack/react-query': 5.80.6(react@19.0.0-rc-45804af1-20241021)
+
   '@marijn/find-cluster-break@1.0.2': {}
 
   '@neondatabase/serverless@0.9.5':
@@ -7049,6 +7075,13 @@ snapshots:
       lodash.merge: 4.6.2
       postcss-selector-parser: 6.0.10
       tailwindcss: 3.4.17
+
+  '@tanstack/query-core@5.80.6': {}
+
+  '@tanstack/react-query@5.80.6(react@19.0.0-rc-45804af1-20241021)':
+    dependencies:
+      '@tanstack/query-core': 5.80.6
+      react: 19.0.0-rc-45804af1-20241021
 
   '@types/babel__core@7.20.5':
     dependencies:

@@ -1,14 +1,14 @@
-"use client";
+'use client';
 
-import { useRouter } from "next/navigation";
-import { useWindowSize } from "usehooks-ts";
+import { useRouter } from 'next/navigation';
+import { useWindowSize } from 'usehooks-ts';
 
-import { SidebarToggle } from "@/components/sidebar-toggle";
-import { Button } from "@/components/ui/button";
-import { PlusIcon } from "./icons";
-import { useSidebar } from "./ui/sidebar";
-import { memo } from "react";
-import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
+import { SidebarToggle } from '@/components/sidebar-toggle';
+import { Button } from '@/components/ui/button';
+import { PlusIcon } from './icons';
+import { useSidebar } from './ui/sidebar';
+import { memo } from 'react';
+import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 
 function PureChatHeader() {
   const router = useRouter();
@@ -27,14 +27,14 @@ function PureChatHeader() {
               variant="outline"
               className="order-2 md:order-1 md:px-2 px-2 md:h-fit ml-auto md:ml-0"
               onClick={() => {
-                router.push("/");
+                router.push('/');
                 router.refresh();
               }}
             >
               <PlusIcon />
             </Button>
           </TooltipTrigger>
-          <TooltipContent>New Chat</TooltipContent>
+          <TooltipContent>Nouvelle conversation</TooltipContent>
         </Tooltip>
       )}
     </header>
