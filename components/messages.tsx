@@ -1,32 +1,24 @@
-import { PreviewMessage, ThinkingMessage } from './message';
-import { Greeting } from './greeting';
-import { memo, useEffect } from 'react';
-import type { UseChatHelpers } from '@ai-sdk/react';
-import { motion } from 'framer-motion';
-import { TEMP_MSG_ID_PREFIX } from '@/constants';
-import { useScrollToBottom } from '@/hooks/use-scroll-to-bottom';
+import { PreviewMessage, ThinkingMessage } from "./message";
+import { Greeting } from "./greeting";
+import { memo } from "react";
+import type { UseChatHelpers } from "@ai-sdk/react";
+import { motion } from "framer-motion";
+import { TEMP_MSG_ID_PREFIX } from "@/constants";
+import { useScrollToBottom } from "@/hooks/use-scroll-to-bottom";
 
 interface MessagesProps {
-  chatId?: string;
-  status: UseChatHelpers['status'];
+  status: UseChatHelpers["status"];
   messages: Array<Message>;
   loading?: boolean;
 }
 
-function PureMessages({ chatId, status, messages, loading }: MessagesProps) {
+function PureMessages({ status, messages, loading }: MessagesProps) {
   const {
     containerRef: messagesContainerRef,
     endRef: messagesEndRef,
     onViewportEnter,
     onViewportLeave,
-    scrollToBottom,
   } = useScrollToBottom();
-
-  useEffect(() => {
-    if (chatId) {
-      scrollToBottom('instant');
-    }
-  }, [chatId, scrollToBottom]);
 
   const hasSentMessage = messages?.length > 0;
   const lastMessage = messages?.[messages.length - 1];

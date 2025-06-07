@@ -4,15 +4,13 @@ import { toast } from '@/components/toast';
 import { useChatStore } from '@/store/chat-store';
 import { TEMP_MSG_ID_PREFIX } from '@/constants';
 import { queries } from '@/lib/query-keys';
-import { useScrollToBottom } from './use-scroll-to-bottom';
-import { useEffect } from 'react';
+import { useMemo, useState } from 'react';
 
 export const useMessages = (chatId?: string) => {
   const chatMessages = useChatStore((state) => state.messages);
   const addMessages = useChatStore((state) => state.addMessages);
   const clearMessages = useChatStore((state) => state.clearMessages);
 
-  const { scrollToBottom } = useScrollToBottom();
 
   const { isLoading: isMessagesLoading, data: messages } = useQuery<Message[]>({
     ...queries.chat.messages({ chatId: chatId as string }),
@@ -25,13 +23,6 @@ export const useMessages = (chatId?: string) => {
       return decodedMessages;
     },
   });
-
-  useEffect(() => {
-    if (messages) {
-      clearMessages();
-      addMessages(messages);
-    }
-  }, [messages, addMessages, clearMessages]);
 
   const { mutate: sendMessage, isPending: isSendMessagePending } = useMutation<
     Message[],
@@ -63,7 +54,6 @@ export const useMessages = (chatId?: string) => {
         // replaceMessageId(tempMessage.id, userMessage.id);
       }
       reply && addMessages([reply]);
-      scrollToBottom('smooth');
     },
     onError: (error: Error) => {
       console.error(error);
@@ -75,9 +65,13 @@ export const useMessages = (chatId?: string) => {
     },
   });
 
+  const allMessages = useMemo(() => {
+    return [...(messages ?? []), ...chatMessages];
+  }, [chatMessages, messages]);
+
   return {
     sendMessage,
-    chatMessages,
+    chatMessages: allMessages,
     isSendMessagePending,
     isMessagesLoading,
     clearMessages,

@@ -1,117 +1,133 @@
-'use client';
+"use client";
 
-import cx from 'classnames';
-import type React from 'react';
-import { useRef, useEffect, useState, memo } from 'react';
-import { toast } from 'sonner';
-import { useWindowSize } from 'usehooks-ts';
+import cx from "classnames";
+import type React from "react";
+import { useRef, useEffect, useState, memo, useCallback } from "react";
+import { toast } from "sonner";
+import { useWindowSize } from "usehooks-ts";
 
-import { ArrowUpIcon, PaperclipIcon, StopIcon } from './icons';
-import { Button } from './ui/button';
-import { Textarea } from './ui/textarea';
-import type { UseChatHelpers } from '@ai-sdk/react';
-import { AnimatePresence, motion } from 'framer-motion';
-import { ArrowDown } from 'lucide-react';
-import { useScrollToBottom } from '@/hooks/use-scroll-to-bottom';
-import { MESSAGE_STATUS } from '@/enums';
-import { useCreateChat } from '@/hooks/use-create-chat';
-import { useMessages } from '@/hooks/use-messages';
-import { useRouter } from 'next/navigation';
+import { ArrowUpIcon, StopIcon } from "./icons";
+import { Button } from "./ui/button";
+import { Textarea } from "./ui/textarea";
+import { AnimatePresence, motion } from "framer-motion";
+import { ArrowDown } from "lucide-react";
+import { useScrollToBottom } from "@/hooks/use-scroll-to-bottom";
+import { MESSAGE_STATUS } from "@/enums";
 
 type MultimodalInputProps = {
-  chatId?: string;
-  status: MESSAGE_STATUS;
   className?: string;
+  sendMessage: (message: string) => void;
+  stop?: () => void;
+  loading?: boolean;
 };
 
+// Constants to avoid recreating objects
+const ANIMATION_CONFIG = {
+  initial: { opacity: 0, y: 10 },
+  animate: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: 10 },
+  transition: { type: "spring" as const, stiffness: 300, damping: 20 },
+};
+
+const AUTO_HEIGHT = "auto";
+const DEFAULT_HEIGHT = "98px";
+const MIN_HEIGHT_OFFSET = 2;
+
 function PureMultimodalInput({
-  chatId,
-  status,
+  loading,
   className,
+  sendMessage,
+  stop,
 }: MultimodalInputProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { width } = useWindowSize();
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState("");
+  const { isAtBottom, scrollToBottom } = useScrollToBottom();
 
-  const router = useRouter();
-
-  const { createChat } = useCreateChat();
-  const { sendMessage } = useMessages(chatId);
-
-  useEffect(() => {
-    if (textareaRef.current) {
-      adjustHeight();
+  // Memoize height adjustment functions
+  const adjustHeight = useCallback(() => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.style.height = AUTO_HEIGHT;
+      textarea.style.height = `${textarea.scrollHeight + MIN_HEIGHT_OFFSET}px`;
     }
   }, []);
 
-  const adjustHeight = () => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = `${
-        textareaRef.current.scrollHeight + 2
-      }px`;
+  const resetHeight = useCallback(() => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.style.height = AUTO_HEIGHT;
+      textarea.style.height = DEFAULT_HEIGHT;
     }
-  };
-
-  const resetHeight = () => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = '98px';
-    }
-  };
-
-  useEffect(() => {
-    if (textareaRef.current) {
-      const domValue = textareaRef.current.value;
-      setInput(domValue);
-      adjustHeight();
-    }
-    // Only run once after hydration
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setInput(event.target.value);
+  // Initialize height on mount
+  useEffect(() => {
     adjustHeight();
-  };
+  }, [adjustHeight]);
 
-  const submitForm = async () => {
-    try {
-      if (!chatId) {
-        const chat = await createChat({
-          title: input,
-        });
-        router.push(`/chat/${chat.id}`);
-      } else {
-        sendMessage({
-          content: input,
-          is_user: true,
-        });
-      }
-    } catch (error) {
-      console.error(error);
-    }
+  // Memoize input change handler
+  const handleInputChange = useCallback(
+    (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+      setInput(event.target.value);
+      adjustHeight();
+    },
+    [adjustHeight],
+  );
 
-    scrollToBottom('instant');
-    setInput('');
+  // Memoize form submission
+  const submitForm = useCallback(() => {
+    if (!input.trim()) return;
+
+    sendMessage(input);
+    scrollToBottom("instant");
+    setInput("");
     resetHeight();
 
+    // Focus textarea on desktop
     if (width && width > 768) {
       textareaRef.current?.focus();
     }
-  };
+  }, [input, sendMessage, scrollToBottom, resetHeight, width]);
 
-  const { isAtBottom, scrollToBottom } = useScrollToBottom();
+  // Memoize keyboard event handler
+  const handleKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+      if (
+        event.key === "Enter" &&
+        !event.shiftKey &&
+        !event.nativeEvent.isComposing
+      ) {
+        event.preventDefault();
+
+        if (status !== MESSAGE_STATUS.READY) {
+          toast.error("Please wait for the model to finish its response!");
+        } else {
+          submitForm();
+        }
+      }
+    },
+    [status, submitForm],
+  );
+
+  // Memoize scroll to bottom handler
+  const handleScrollToBottom = useCallback(
+    (event: React.MouseEvent) => {
+      event.preventDefault();
+      scrollToBottom();
+    },
+    [scrollToBottom],
+  );
+
+  const isSubmitting = status === MESSAGE_STATUS.SUBMITTED;
+  const canSend = input.trim().length > 0;
 
   return (
     <div className="relative w-full flex flex-col gap-4">
       <AnimatePresence>
         {!isAtBottom && (
           <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 10 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+            {...ANIMATION_CONFIG}
             className="absolute left-1/2 bottom-28 -translate-x-1/2 z-50"
           >
             <Button
@@ -119,10 +135,7 @@ function PureMultimodalInput({
               className="rounded-full"
               size="icon"
               variant="outline"
-              onClick={(event) => {
-                event.preventDefault();
-                scrollToBottom();
-              }}
+              onClick={handleScrollToBottom}
             >
               <ArrowDown />
             </Button>
@@ -137,33 +150,19 @@ function PureMultimodalInput({
         value={input}
         onChange={handleInputChange}
         className={cx(
-          'min-h-[24px] max-h-[calc(75dvh)] overflow-hidden resize-none rounded-2xl !text-base bg-muted pb-10 dark:border-zinc-700',
+          "min-h-[24px] max-h-[calc(75dvh)] overflow-hidden resize-none rounded-2xl !text-base bg-muted pb-10 dark:border-zinc-700",
           className,
         )}
         rows={2}
         autoFocus
-        onKeyDown={(event) => {
-          if (
-            event.key === 'Enter' &&
-            !event.shiftKey &&
-            !event.nativeEvent.isComposing
-          ) {
-            event.preventDefault();
-
-            if (status !== MESSAGE_STATUS.READY) {
-              toast.error('Please wait for the model to finish its response!');
-            } else {
-              submitForm();
-            }
-          }
-        }}
+        onKeyDown={handleKeyDown}
       />
 
       <div className="absolute bottom-0 right-0 p-2 w-fit flex flex-row justify-end">
-        {status === MESSAGE_STATUS.SUBMITTED ? (
+        {isSubmitting ? (
           <StopButton stop={stop} />
         ) : (
-          <SendButton input={input} submitForm={submitForm} />
+          <SendButton input={canSend} submitForm={submitForm} />
         )}
       </div>
     </div>
@@ -173,50 +172,34 @@ function PureMultimodalInput({
 export const MultimodalInput = memo(
   PureMultimodalInput,
   (prevProps, nextProps) => {
-    if (prevProps.status !== nextProps.status) return false;
-
-    return true;
+    // More comprehensive memoization check
+    return (
+      prevProps.loading === nextProps.loading &&
+      prevProps.className === nextProps.className &&
+      prevProps.sendMessage === nextProps.sendMessage &&
+      prevProps.stop === nextProps.stop
+    );
   },
 );
 
-function PureAttachmentsButton({
-  fileInputRef,
-  status,
-}: {
-  fileInputRef: React.MutableRefObject<HTMLInputElement | null>;
-  status: UseChatHelpers['status'];
-}) {
-  return (
-    <Button
-      data-testid="attachments-button"
-      className="rounded-md rounded-bl-lg p-[7px] h-fit dark:border-zinc-700 hover:dark:bg-zinc-900 hover:bg-zinc-200"
-      onClick={(event) => {
-        event.preventDefault();
-        fileInputRef.current?.click();
-      }}
-      disabled={status !== MESSAGE_STATUS.READY}
-      variant="ghost"
-    >
-      <PaperclipIcon size={14} />
-    </Button>
-  );
-}
-
-const AttachmentsButton = memo(PureAttachmentsButton);
-
 type StopButtonProps = {
-  stop: () => void;
+  stop?: () => void;
 };
 
 function PureStopButton({ stop }: StopButtonProps) {
+  const handleClick = useCallback(
+    (event: React.MouseEvent) => {
+      event.preventDefault();
+      stop?.();
+    },
+    [stop],
+  );
+
   return (
     <Button
       data-testid="stop-button"
       className="rounded-full p-1.5 h-fit border dark:border-zinc-600"
-      onClick={(event) => {
-        event.preventDefault();
-        stop();
-      }}
+      onClick={handleClick}
     >
       <StopIcon size={14} />
     </Button>
@@ -227,19 +210,24 @@ const StopButton = memo(PureStopButton);
 
 type SendButtonProps = {
   submitForm: () => void;
-  input: string;
+  input: boolean; // Changed to boolean for cleaner prop
 };
 
 function PureSendButton({ submitForm, input }: SendButtonProps) {
+  const handleClick = useCallback(
+    (event: React.MouseEvent) => {
+      event.preventDefault();
+      submitForm();
+    },
+    [submitForm],
+  );
+
   return (
     <Button
       data-testid="send-button"
       className="rounded-full p-1.5 h-fit border dark:border-zinc-600"
-      onClick={(event) => {
-        event.preventDefault();
-        submitForm();
-      }}
-      disabled={input.length === 0}
+      onClick={handleClick}
+      disabled={!input}
     >
       <ArrowUpIcon size={14} />
     </Button>
@@ -247,6 +235,8 @@ function PureSendButton({ submitForm, input }: SendButtonProps) {
 }
 
 const SendButton = memo(PureSendButton, (prevProps, nextProps) => {
-  if (prevProps.input !== nextProps.input) return false;
-  return true;
+  return (
+    prevProps.input === nextProps.input &&
+    prevProps.submitForm === nextProps.submitForm
+  );
 });
