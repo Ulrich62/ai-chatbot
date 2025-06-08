@@ -12,6 +12,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const {
     chatMessages: messages,
     isSendMessagePending,
+    isMessagesLoading,
     sendMessage,
   } = useMessages(id);
 
@@ -28,7 +29,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
 
       <Messages
         messages={messages}
-        loading={isSendMessagePending}
+        loading={isMessagesLoading}
         status={MESSAGE_STATUS.READY}
       />
 

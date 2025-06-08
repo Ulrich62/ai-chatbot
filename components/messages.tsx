@@ -1,6 +1,6 @@
 import { PreviewMessage, ThinkingMessage } from "./message";
 import { Greeting } from "./greeting";
-import { memo } from "react";
+import { memo, useEffect } from "react";
 import type { UseChatHelpers } from "@ai-sdk/react";
 import { motion } from "framer-motion";
 import { TEMP_MSG_ID_PREFIX } from "@/constants";
@@ -18,7 +18,12 @@ function PureMessages({ status, messages, loading }: MessagesProps) {
     endRef: messagesEndRef,
     onViewportEnter,
     onViewportLeave,
+    scrollToBottom,
   } = useScrollToBottom();
+
+  useEffect(() => {
+    scrollToBottom("instant");
+  }, [messages, scrollToBottom]);
 
   const hasSentMessage = messages?.length > 0;
   const lastMessage = messages?.[messages.length - 1];

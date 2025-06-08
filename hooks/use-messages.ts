@@ -4,13 +4,12 @@ import { toast } from '@/components/toast';
 import { useChatStore } from '@/store/chat-store';
 import { TEMP_MSG_ID_PREFIX } from '@/constants';
 import { queries } from '@/lib/query-keys';
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 
 export const useMessages = (chatId?: string) => {
   const chatMessages = useChatStore((state) => state.messages);
   const addMessages = useChatStore((state) => state.addMessages);
   const clearMessages = useChatStore((state) => state.clearMessages);
-
 
   const { isLoading: isMessagesLoading, data: messages } = useQuery<Message[]>({
     ...queries.chat.messages({ chatId: chatId as string }),

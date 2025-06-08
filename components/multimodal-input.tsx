@@ -3,7 +3,6 @@
 import cx from "classnames";
 import type React from "react";
 import { useRef, useEffect, useState, memo, useCallback } from "react";
-import { toast } from "sonner";
 import { useWindowSize } from "usehooks-ts";
 
 import { ArrowUpIcon, StopIcon } from "./icons";
@@ -12,7 +11,13 @@ import { Textarea } from "./ui/textarea";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowDown } from "lucide-react";
 import { useScrollToBottom } from "@/hooks/use-scroll-to-bottom";
-import { MESSAGE_STATUS } from "@/enums";
+import {
+  ANIMATION_CONFIG,
+  AUTO_HEIGHT,
+  DEFAULT_HEIGHT,
+  DESKTOP_WIDTH,
+  MIN_HEIGHT_OFFSET,
+} from "@/constants/global";
 
 type MultimodalInputProps = {
   className?: string;
@@ -20,18 +25,6 @@ type MultimodalInputProps = {
   stop?: () => void;
   loading?: boolean;
 };
-
-// Constants to avoid recreating objects
-const ANIMATION_CONFIG = {
-  initial: { opacity: 0, y: 10 },
-  animate: { opacity: 1, y: 0 },
-  exit: { opacity: 0, y: 10 },
-  transition: { type: "spring" as const, stiffness: 300, damping: 20 },
-};
-
-const AUTO_HEIGHT = "auto";
-const DEFAULT_HEIGHT = "98px";
-const MIN_HEIGHT_OFFSET = 2;
 
 function PureMultimodalInput({
   loading,
@@ -85,7 +78,7 @@ function PureMultimodalInput({
     resetHeight();
 
     // Focus textarea on desktop
-    if (width && width > 768) {
+    if (width && width > DESKTOP_WIDTH) {
       textareaRef.current?.focus();
     }
   }, [input, sendMessage, scrollToBottom, resetHeight, width]);
@@ -100,14 +93,10 @@ function PureMultimodalInput({
       ) {
         event.preventDefault();
 
-        if (status !== MESSAGE_STATUS.READY) {
-          toast.error("Please wait for the model to finish its response!");
-        } else {
-          submitForm();
-        }
+        submitForm();
       }
     },
-    [status, submitForm],
+    [submitForm],
   );
 
   // Memoize scroll to bottom handler
@@ -119,7 +108,7 @@ function PureMultimodalInput({
     [scrollToBottom],
   );
 
-  const isSubmitting = status === MESSAGE_STATUS.SUBMITTED;
+  const isSubmitting = loading;
   const canSend = input.trim().length > 0;
 
   return (

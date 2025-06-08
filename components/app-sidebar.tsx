@@ -65,7 +65,9 @@ export function AppSidebar({ user }: { user: User | undefined }) {
           </div>
         </SidebarMenu>
       </SidebarHeader>
-      <SidebarContent>{/* <SidebarHistory user={user} /> */}</SidebarContent>
+      <SidebarContent>
+        <SidebarHistory user={user} />
+      </SidebarContent>
       <SidebarFooter>{user && <SidebarUserNav user={user} />}</SidebarFooter>
     </Sidebar>
   );
