@@ -1,25 +1,26 @@
-'use client';
+"use client";
 
-import { useParams } from 'next/navigation';
-import type { User } from 'next-auth';
-import { motion } from 'framer-motion';
+import { useParams } from "next/navigation";
+import type { User } from "next-auth";
+import { motion } from "framer-motion";
 import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarMenu,
   useSidebar,
-} from '@/components/ui/sidebar';
-import { ChatItem } from './sidebar-history-item';
-import { groupChatsByDate } from '@/utils/groupChatsByDate';
-import { useInfiniteChatHistory } from '@/hooks/use-infinite-chat-history';
-import { useState } from 'react';
-import { Input } from './ui/input';
-import { useDebounce } from '@/hooks/use-debounce';
+} from "@/components/ui/sidebar";
+import { ChatItem } from "./sidebar-history-item";
+import { groupChatsByDate } from "@/utils/groupChatsByDate";
+import { useInfiniteChatHistory } from "@/hooks/use-infinite-chat-history";
+import { useState, useEffect } from "react";
+import { Input } from "./ui/input";
+import { useDebounce } from "@/hooks/use-debounce";
+import { random } from "lodash";
 
 export function SidebarHistory({ user }: { user: User | undefined }) {
   const { setOpenMobile } = useSidebar();
   const { id } = useParams();
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 500);
 
   const {
@@ -195,13 +196,19 @@ export function SidebarHistory({ user }: { user: User | undefined }) {
 }
 
 const Skeleton = () => {
+  const [width, setWidth] = useState("100%"); // fallback for SSR
+
+  useEffect(() => {
+    setWidth(`${random(0, 100, true)}%`);
+  }, []);
+
   return (
     <div className="rounded-md h-8 flex gap-2 px-2 items-center">
       <div
         className="h-4 rounded-md flex-1 max-w-[--skeleton-width] bg-sidebar-accent-foreground/10"
         style={
           {
-            '--skeleton-width': `${Math.random() * 100}%`,
+            "--skeleton-width": width,
           } as React.CSSProperties
         }
       />

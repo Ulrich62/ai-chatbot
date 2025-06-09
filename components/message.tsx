@@ -1,14 +1,14 @@
-'use client';
+"use client";
 
-import cx from 'classnames';
-import { AnimatePresence, motion } from 'framer-motion';
-import { memo } from 'react';
-import { Markdown } from './markdown';
-import equal from 'fast-deep-equal';
-import { cn, sanitizeText } from '@/lib/utils';
-import { ROLES } from '@/enums';
-import Image from 'next/image';
-import AssistantIcon from '@/assets/icons/bot.svg';
+import cx from "classnames";
+import { AnimatePresence, motion } from "framer-motion";
+import { memo } from "react";
+import { Markdown } from "./markdown";
+import equal from "fast-deep-equal";
+import { cn, sanitizeText } from "@/lib/utils";
+import { ROLES } from "@/enums";
+import Image from "next/image";
+import AssistantIcon from "@/assets/icons/bot.svg";
 
 type PurePreviewMessageProps = {
   message: Message;
@@ -32,24 +32,24 @@ const PurePreviewMessage = ({
       >
         <div
           className={cn(
-            'flex gap-4 w-full group-data-[role=user]/message:ml-auto group-data-[role=user]/message:max-w-2xl',
+            "flex gap-4 w-full group-data-[role=user]/message:ml-auto group-data-[role=user]/message:max-w-2xl",
             {
-              'group-data-[role=user]/message:w-fit': true,
+              "group-data-[role=user]/message:w-fit": true,
             },
           )}
         >
           {role === ROLES.ASSISTANT && <AssistantAvatar />}
 
           <div
-            className={cn('flex flex-col gap-4 w-full', {
-              'min-h-96': role === ROLES.ASSISTANT && requiresScrollPadding,
+            className={cn("flex flex-col gap-4 w-full", {
+              "min-h-96": role === ROLES.ASSISTANT && requiresScrollPadding,
             })}
           >
             <div className="flex flex-row gap-2 items-start">
               <div
                 data-testid="message-content"
-                className={cn('flex flex-col gap-4', {
-                  'bg-primary text-primary-foreground px-3 py-2 rounded-xl':
+                className={cn("flex flex-col gap-4", {
+                  "bg-[#1C539B] text-white px-3 py-2 rounded-xl":
                     message.is_user,
                 })}
               >
@@ -77,7 +77,7 @@ export const PreviewMessage = memo(
 );
 
 export const ThinkingMessage = () => {
-  const role = 'assistant';
+  const role = "assistant";
 
   return (
     <motion.div
@@ -89,9 +89,9 @@ export const ThinkingMessage = () => {
     >
       <div
         className={cx(
-          'flex gap-4 group-data-[role=user]/message:px-3 w-full group-data-[role=user]/message:w-fit group-data-[role=user]/message:ml-auto group-data-[role=user]/message:max-w-2xl group-data-[role=user]/message:py-2 rounded-xl',
+          "flex gap-4 group-data-[role=user]/message:px-3 w-full group-data-[role=user]/message:w-fit group-data-[role=user]/message:ml-auto group-data-[role=user]/message:max-w-2xl group-data-[role=user]/message:py-2 rounded-xl",
           {
-            'group-data-[role=user]/message:bg-muted': true,
+            "group-data-[role=user]/message:bg-muted": true,
           },
         )}
       >

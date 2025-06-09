@@ -1,6 +1,8 @@
-export default {
+const env = {
   AUTH_API_BASE_URL: process.env.NEXT_PUBLIC_AUTH_API_BASE_URL,
   RAG_API_BASE_URL: process.env.NEXT_PUBLIC_RAG_API_BASE_URL,
   PASSWORD_RESET_URL: process.env.NEXT_PUBLIC_PASSWORD_RESET_URL,
   ACCESS_TOKEN: process.env.NEXT_PUBLIC_AUTH_ACCESS_TOKEN,
 };
+
+export default env;
