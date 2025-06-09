@@ -11,11 +11,11 @@ import {
 } from "@/components/ui/sidebar";
 import { ChatItem } from "./sidebar-history-item";
 import { groupChatsByDate } from "@/utils/groupChatsByDate";
-import { useInfiniteChatHistory } from "@/hooks/use-infinite-chat-history";
 import { useState, useEffect } from "react";
 import { Input } from "./ui/input";
 import { useDebounce } from "@/hooks/use-debounce";
 import { random } from "lodash";
+import { useChat } from "@/hooks/use-chat";
 
 export function SidebarHistory({ user }: { user: User | undefined }) {
   const { setOpenMobile } = useSidebar();
@@ -31,7 +31,7 @@ export function SidebarHistory({ user }: { user: User | undefined }) {
     hasEmptyChatHistory,
     needsManualLoad,
     handleLoadMore,
-  } = useInfiniteChatHistory({
+  } = useChat({
     enabled: !!user,
     search: debouncedSearch,
   });
