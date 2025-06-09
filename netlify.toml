@@ -1,0 +1,10 @@
+[build]
+  command = "pnpm run build"
+  publish = ".next"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+# Ensure dynamic routes are handled by the Netlify Next.js runtime
+[functions]
+  node_bundler = "esbuild" 
