@@ -1,39 +1,43 @@
 import { create } from 'zustand';
 
 type ChatState = {
-  messages: Message[];
+  chats: Chat[];
   currentChat: Chat | null;
 };
 
 type ChatActions = {
-  addMessages: (msgList: Message[]) => void;
-  updateMessage: (id: string, updates: Partial<Message>) => void;
-  replaceMessageId: (oldId: string, newId: string) => void;
-  setCurrentChat: (chat: Chat) => void;
-  clearMessages: () => void;
-  setMessages: (messages: Message[]) => void;
+  setChats: (chats: Chat[]) => void;
+  addChat: (chat: Chat) => void;
+  addChatsToEnd: (chats: Chat[]) => void;
+  updateChat: (id: string, updates: Partial<Chat>) => void;
+  setCurrentChat: (chat: Chat | null) => void;
+  clearChats: () => void;
 };
 
 export const useChatStore = create<ChatState & ChatActions>((set) => ({
-  messages: [],
+  chats: [],
   currentChat: null,
-  addMessages: (msgList) =>
+
+  setChats: (chats) => set({ chats }),
+
+  addChat: (chat) =>
     set((state) => ({
-      messages: [...state.messages, ...msgList],
+      chats: [chat, ...state.chats], // Add to top for newest first
     })),
-  updateMessage: (id, updates) =>
+
+  addChatsToEnd: (chats) =>
     set((state) => ({
-      messages: state.messages.map((msg) =>
-        msg.id === id ? { ...msg, ...updates } : msg,
+      chats: [...state.chats, ...chats], // Add to end for pagination
+    })),
+
+  updateChat: (id, updates) =>
+    set((state) => ({
+      chats: state.chats.map((chat) =>
+        chat.id === id ? { ...chat, ...updates } : chat,
       ),
     })),
-  replaceMessageId: (oldId, newId) =>
-    set((state) => ({
-      messages: state.messages.map((msg) =>
-        msg.id === oldId ? { ...msg, id: newId } : msg,
-      ),
-    })),
+
   setCurrentChat: (chat) => set({ currentChat: chat }),
-  clearMessages: () => set({ messages: [] }),
-  setMessages: (messages: Message[]) => set({ messages }),
+
+  clearChats: () => set({ chats: [] }),
 }));

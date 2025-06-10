@@ -1,3 +1,4 @@
+import { useMessages } from '@/hooks/use-messages';
 import { SidebarMenuButton, SidebarMenuItem } from './ui/sidebar';
 import Link from 'next/link';
 import { memo } from 'react';
@@ -9,8 +10,10 @@ type ChatProps = {
 };
 
 const PureChatItem = ({ chat, isActive, setOpenMobile }: ChatProps) => {
+  const { clearMessages } = useMessages();
+
   const handleItemClick = () => {
-    setOpenMobile(false);
+    clearMessages();
   };
 
   return (

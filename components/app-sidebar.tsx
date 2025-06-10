@@ -1,6 +1,5 @@
 "use client";
 
-import type { User } from "next-auth";
 import { useRouter } from "next/navigation";
 
 import { PlusIcon } from "@/components/icons";
@@ -18,7 +17,7 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 import { useMessages } from "@/hooks/use-messages";
 
-export function AppSidebar({ user }: { user: User | undefined }) {
+export function AppSidebar() {
   const { clearMessages } = useMessages();
 
   const router = useRouter();
@@ -66,9 +65,11 @@ export function AppSidebar({ user }: { user: User | undefined }) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <SidebarHistory user={user} />
+        <SidebarHistory />
       </SidebarContent>
-      <SidebarFooter>{user && <SidebarUserNav user={user} />}</SidebarFooter>
+      <SidebarFooter>
+        <SidebarUserNav />
+      </SidebarFooter>
     </Sidebar>
   );
 }

@@ -5,6 +5,11 @@ import Image from "next/image";
 import type { User } from "next-auth";
 import { signOut, useSession } from "next-auth/react";
 import { useTheme } from "next-themes";
+import { useRouter } from "next/navigation";
+import { toast } from "./toast";
+import { LoaderIcon } from "./icons";
+import { guestRegex } from "@/lib/constants";
+import { useAuth } from "@/hooks/use-auth";
 
 import {
   DropdownMenu,
@@ -18,14 +23,18 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { useRouter } from "next/navigation";
-import { toast } from "./toast";
-import { LoaderIcon } from "./icons";
-import { guestRegex } from "@/lib/constants";
 
-export function SidebarUserNav({ user }: { user: User }) {
+export function SidebarUserNav() {
   const router = useRouter();
   const { setTheme, resolvedTheme } = useTheme();
+  const { user, loading, error } = useAuth();
+
+  if (loading) {
+    return <div className="p-4">Chargement...</div>;
+  }
+  if (error || !user) {
+    return <div className="p-4 text-red-500">Non authentifié</div>;
+  }
 
   const isGuest = guestRegex.test(user?.email ?? "");
 
@@ -62,21 +71,19 @@ export function SidebarUserNav({ user }: { user: User }) {
                 type="button"
                 className="w-full cursor-pointer"
                 onClick={() => {
-                  if (status === "loading") {
+                  if (loading) {
                     toast({
                       type: "error",
                       description:
                         "Checking authentication status, please try again!",
                     });
-
                     return;
                   }
-
                   if (isGuest) {
                     router.push("/login");
                   } else {
-                    signOut({
-                      redirectTo: "/",
+                    fetch("/api/auth/signout", { method: "POST" }).then(() => {
+                      window.location.href = "/";
                     });
                   }
                 }}

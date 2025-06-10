@@ -7,8 +7,7 @@ import { Markdown } from "./markdown";
 import equal from "fast-deep-equal";
 import { cn, sanitizeText } from "@/lib/utils";
 import { ROLES } from "@/enums";
-import Image from "next/image";
-import AssistantIcon from "@/assets/icons/bot.svg";
+import { BotIcon } from "./icons/BotIcon";
 
 type PurePreviewMessageProps = {
   message: Message;
@@ -110,7 +109,7 @@ export const ThinkingMessage = () => {
 const AssistantAvatar = () => {
   return (
     <div className="size-6 flex items-center rounded-full justify-center ring-1 shrink-0 ring-border bg-background">
-      <Image src={AssistantIcon} alt="logo" width={24} height={24} />
+      <BotIcon color="#1C539B" />
     </div>
   );
 };

@@ -1,15 +1,15 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { sendMessage as sendMessageApi } from '@/apis/chat-api';
 import { toast } from '@/components/toast';
-import { useChatStore } from '@/store/chat-store';
 import { TEMP_MSG_ID_PREFIX } from '@/constants';
 import { queries } from '@/lib/query-keys';
 import { useMemo } from 'react';
+import { useMessageStore } from '@/store/message-store';
 
 export const useMessages = (chatId?: string) => {
-  const chatMessages = useChatStore((state) => state.messages);
-  const addMessages = useChatStore((state) => state.addMessages);
-  const clearMessages = useChatStore((state) => state.clearMessages);
+  const chatMessages = useMessageStore((state) => state.messages);
+  const addMessages = useMessageStore((state) => state.addMessages);
+  const clearMessages = useMessageStore((state) => state.clearMessages);
 
   const { isLoading: isMessagesLoading, data: messages } = useQuery<Message[]>({
     ...queries.chat.messages({ chatId: chatId as string }),
