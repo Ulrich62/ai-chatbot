@@ -1,6 +1,9 @@
 "use client";
 
+import env from "@/utils/env";
+import Link from "next/link";
 import { useState } from "react";
+import Image from "next/image";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("info@denemlabs.com");
@@ -30,27 +33,29 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-400 to-white">
-      <div className="bg-white rounded-lg shadow-lg flex w-full max-w-2xl overflow-hidden m-4">
+    <div className="min-h-screen flex items-center justify-center bg-[#1c539b20] backdrop-blur-sm">
+      <div className="bg-white rounded-lg shadow-lg flex w-full max-w-3xl overflow-hidden m-4">
         <div className="hidden md:flex items-center justify-center w-1/2 bg-blue-100">
           {/* Illustration placeholder */}
-          <img
-            src="/images/login-illustration.jpg"
+          <Image
+            src="/images/login-illustration.svg"
             alt="Login Illustration"
-            className="w-64 h-64"
+            width={350}
+            height={350}
+            priority
           />
         </div>
-        <div className="w-full md:w-1/2 p-8">
+        <div className="w-full md:w-1/2 px-8 py-12">
           <div className="flex flex-col items-center mb-6">
             <span className="text-blue-600 text-3xl font-bold mb-2">🔐</span>
-            <h2 className="text-2xl font-semibold text-blue-700">Connexion</h2>
+            <h2 className="text-2xl font-semibold text-[#1C539B]">Connexion</h2>
           </div>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-gray-600 text-sm mb-1">Email</label>
               <input
                 type="email"
-                className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#1C539B]"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -63,21 +68,25 @@ export default function LoginPage() {
               </label>
               <input
                 type="password"
-                className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#1C539B]"
                 value={pass}
                 onChange={(e) => setPass(e.target.value)}
                 required
               />
             </div>
             <div className="flex justify-end text-xs mb-2">
-              <a href="#" className="text-blue-500 hover:underline">
+              <Link
+                href={env.PASSWORD_RESET_URL || ""}
+                target="_blank"
+                className="text-[#1C539B] hover:underline"
+              >
                 Mot de passe oublié ?
-              </a>
+              </Link>
             </div>
             {error && <div className="text-red-500 text-sm">{error}</div>}
             <button
               type="submit"
-              className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition"
+              className="w-full bg-[#1C539B] text-white py-2 rounded hover:bg-[#1C539B] transition"
               disabled={loading}
             >
               {loading ? "Connexion..." : "Connexion"}
