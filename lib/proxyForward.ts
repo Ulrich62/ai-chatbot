@@ -17,16 +17,19 @@ export async function proxyForward(req: NextRequest, targetUrl: string) {
     body = await req.text();
   }
 
-  console.log("targetUrl", targetUrl);
+  // Ajout des query params de la requête entrante à l'URL cible
+  const url = new URL(req.url);
+  const search = url.search; // inclut ?page=...&limit=... si présents
+  const fullTargetUrl = targetUrl + search;
 
-  const backendRes = await fetch(targetUrl, {
+
+  const backendRes = await fetch(fullTargetUrl, {
     method: req.method,
     headers,
     body,
     redirect: 'manual',
   });
 
-  console.log("backendRes", backendRes);
 
   // Forwarder le body tel quel (json ou texte)
   const resBody = await backendRes.text();
