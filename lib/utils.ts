@@ -25,6 +25,6 @@ export function generateUUID(): string {
 
 
 export function sanitizeText(text: string) {
-  text = parseUnicodeString(text);
-  return text.replace('<has_function_call>', '');
+  const parsedText = parseUnicodeString(text);
+  return parsedText.replace('<has_function_call>', '');
 }
