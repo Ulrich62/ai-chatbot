@@ -273,9 +273,6 @@ importers:
       '@biomejs/biome':
         specifier: 1.9.4
         version: 1.9.4
-      '@netlify/plugin-nextjs':
-        specifier: ^5.11.2
-        version: 5.11.2
       '@playwright/test':
         specifier: ^1.50.1
         version: 1.51.0
@@ -1422,10 +1419,6 @@ packages:
 
   '@neondatabase/serverless@0.9.5':
     resolution: {integrity: sha512-siFas6gItqv6wD/pZnvdu34wEqgG3nSE6zWZdq5j2DEsa+VvX8i/5HXJOo06qrw5axPXn+lGCxeR+NLaSPIXug==}
-
-  '@netlify/plugin-nextjs@5.11.2':
-    resolution: {integrity: sha512-9Hgd/J5nP2U/Vv0teytq9uUAGppiKV9t5tzpsuMLqeqUGD9STxXwKmyZd2v8Z4THSW9rw4+8w7dH7LVlFoym2A==}
-    engines: {node: '>=18.0.0'}
 
   '@next/env@15.3.0-canary.31':
     resolution: {integrity: sha512-+GFb0o+c/N7NVhEOVoaE1KaiYbtSUWCgVzS2OM1NqpesuzhOtz1nHYVGZTbLC8dipHOZsVdtsNSYOhk6HR4U0g==}
@@ -6466,8 +6459,6 @@ snapshots:
   '@neondatabase/serverless@0.9.5':
     dependencies:
       '@types/pg': 8.11.6
-
-  '@netlify/plugin-nextjs@5.11.2': {}
 
   '@next/env@15.3.0-canary.31': {}
 
