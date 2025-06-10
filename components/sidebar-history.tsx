@@ -16,12 +16,14 @@ import { Input } from "./ui/input";
 import { useDebounce } from "@/hooks/use-debounce";
 import { random } from "lodash";
 import { useChat } from "@/hooks/use-chat";
+import { useAuth } from "@/hooks/use-auth";
 
-export function SidebarHistory({ user }: { user: User | undefined }) {
+export function SidebarHistory() {
   const { setOpenMobile } = useSidebar();
   const { id } = useParams();
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 500);
+  const { user } = useAuth();
 
   const {
     chats,
