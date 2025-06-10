@@ -1,4 +1,4 @@
-import type { CoreAssistantMessage, CoreToolMessage, UIMessage } from 'ai';
+import { parseUnicodeString } from '@/utils/parse-unicode-string';
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -25,5 +25,6 @@ export function generateUUID(): string {
 
 
 export function sanitizeText(text: string) {
+  text = parseUnicodeString(text);
   return text.replace('<has_function_call>', '');
 }
