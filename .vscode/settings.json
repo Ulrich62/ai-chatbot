@@ -17,5 +17,8 @@
     {
       "pattern": "packages/*"
     }
+  ],
+  "i18n-ally.localesPaths": [
+    "app/api/chat/proxy/messages"
   ]
 }
