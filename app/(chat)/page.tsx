@@ -5,14 +5,17 @@ import { MultimodalInput } from "@/components/multimodal-input";
 import { MESSAGE_STATUS } from "@/enums";
 import { useChat } from "@/hooks/use-chat";
 import { useMessages } from "@/hooks/use-messages";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 export default function Page() {
-  const [isNewChat, setIsNewChat] = useState(true);
   const [chatId, setChatId] = useState<string>("");
 
   const { chatMessages: messages, isCreateChatPending, createChat } = useChat();
-  const { sendMessage } = useMessages(chatId);
+  const { sendMessage } = useMessages(messages.length ? chatId : "");
+
+  const isNewChat = useMemo(() => {
+    return !messages.length;
+  }, [messages.length]);
 
   const handleCreateChat = async (message: string) => {
     if (!isNewChat) {
@@ -24,7 +27,6 @@ export default function Page() {
     }
     try {
       const chat = await createChat({ title: message });
-      setIsNewChat(false);
       setChatId(chat.id);
       window.history.replaceState({}, "", `/chat/${chat.id}`);
     } catch (error) {

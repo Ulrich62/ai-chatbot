@@ -14,7 +14,7 @@ interface UseChatOptions {
 }
 
 export const useChat = ({ enabled = true, search }: UseChatOptions = {}) => {
-  const { chats, addChat, addChatsToEnd, setCurrentChat } = useChatStore();
+  const { chats, addChat, addChatsToEnd } = useChatStore();
 
   const {
     messages: chatMessages,
@@ -55,7 +55,6 @@ export const useChat = ({ enabled = true, search }: UseChatOptions = {}) => {
       },
       onSuccess: (data) => {
         addChat(data);
-        setCurrentChat(data);
 
         if (data?.messages) {
           const reply = data?.messages.find((message) => !message.is_user);
