@@ -1,7 +1,8 @@
-import { useMessages } from '@/hooks/use-messages';
-import { SidebarMenuButton, SidebarMenuItem } from './ui/sidebar';
-import Link from 'next/link';
-import { memo } from 'react';
+import { useMessages } from "@/hooks/use-messages";
+import { SidebarMenuButton, SidebarMenuItem } from "./ui/sidebar";
+import Link from "next/link";
+import { memo } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 type ChatProps = {
   chat: Chat;
@@ -11,9 +12,11 @@ type ChatProps = {
 
 const PureChatItem = ({ chat, isActive, setOpenMobile }: ChatProps) => {
   const { clearMessages } = useMessages();
+  const isMobile = useIsMobile();
 
   const handleItemClick = () => {
     clearMessages();
+    if (isMobile) setOpenMobile(false);
   };
 
   return (

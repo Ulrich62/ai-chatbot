@@ -16,12 +16,14 @@ import {
 } from "@/components/ui/sidebar";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 import { useMessages } from "@/hooks/use-messages";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export function AppSidebar() {
   const { clearMessages } = useMessages();
 
   const router = useRouter();
   const { setOpenMobile } = useSidebar();
+  const isMobile = useIsMobile();
 
   const handleNewChat = () => {
     setOpenMobile(false);
@@ -48,19 +50,32 @@ export function AppSidebar() {
                 BGDS Assistant
               </span>
             </button>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  type="button"
-                  className="p-2 h-fit"
-                  onClick={handleNewChat}
-                >
-                  <PlusIcon />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent align="end">Nouvelle conversation</TooltipContent>
-            </Tooltip>
+            {isMobile ? (
+              <Button
+                variant="ghost"
+                type="button"
+                className="p-2 h-fit"
+                onClick={handleNewChat}
+              >
+                <PlusIcon />
+              </Button>
+            ) : (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    type="button"
+                    className="p-2 h-fit"
+                    onClick={handleNewChat}
+                  >
+                    <PlusIcon />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent align="end">
+                  Nouvelle conversation
+                </TooltipContent>
+              </Tooltip>
+            )}
           </div>
         </SidebarMenu>
       </SidebarHeader>
