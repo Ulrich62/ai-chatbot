@@ -23,7 +23,7 @@ function PureMessages({ status, messages, loading }: MessagesProps) {
 
   useEffect(() => {
     scrollToBottom("instant");
-  }, [messages, scrollToBottom]);
+  }, [scrollToBottom]);
 
   const hasSentMessage = messages?.length > 0;
   const lastMessage = messages?.[messages.length - 1];
