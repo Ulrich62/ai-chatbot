@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 import { decodeJWT } from '@/utils/jwt-decoder';
 
 export async function GET(req: NextRequest) {

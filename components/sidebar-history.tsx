@@ -1,7 +1,6 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import type { User } from "next-auth";
 import { motion } from "framer-motion";
 import {
   SidebarGroup,

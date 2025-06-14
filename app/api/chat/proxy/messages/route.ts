@@ -1,8 +1,8 @@
-import { NextRequest } from 'next/server';
+import type { NextRequest } from 'next/server';
 import { proxyForward } from '@/lib/proxyForward';
 import env from '@/utils/env';
 
-const BACKEND_URL = env.RAG_API_BASE_URL + '/messages/chat';
+const BACKEND_URL = `${env.RAG_API_BASE_URL}/messages/chat`;
 
 export async function GET(req: NextRequest) {
   // On forwarde l'ID du chat dans l'URL

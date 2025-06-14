@@ -21,7 +21,7 @@ export const parseUnicodeString = (text: string, fallback?: string): string => {
       .replace(/\\"/g, '"')   // Handle quotes
       .replace(/\\\\/g, '\\') // Handle backslashes
       .replace(/\\u([0-9a-fA-F]{4})/g, (_, code) => 
-        String.fromCharCode(parseInt(code, 16))
+        String.fromCharCode(Number.parseInt(code, 16))
       ); // Handle Unicode escape sequences
 
     return processedText;
