@@ -143,7 +143,6 @@ function PureMultimodalInput({
           className,
         )}
         rows={2}
-        autoFocus
         onKeyDown={handleKeyDown}
       />
 

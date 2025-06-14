@@ -1,60 +1,74 @@
 import { PreviewMessage, ThinkingMessage } from "./message";
 import { Greeting } from "./greeting";
-import { memo, useEffect } from "react";
-import type { UseChatHelpers } from "@ai-sdk/react";
+import { memo, useEffect, useRef, useMemo } from "react";
 import { motion } from "framer-motion";
 import { TEMP_MSG_ID_PREFIX } from "@/constants";
-import { useScrollToBottom } from "@/hooks/use-scroll-to-bottom";
+import { useScrollToView } from "@/hooks/use-scroll-to-view";
 
 interface MessagesProps {
-  status: UseChatHelpers["status"];
   messages: Array<Message>;
   loading?: boolean;
 }
 
-function PureMessages({ status, messages, loading }: MessagesProps) {
-  const {
-    containerRef: messagesContainerRef,
-    endRef: messagesEndRef,
-    onViewportEnter,
-    onViewportLeave,
-    scrollToBottom,
-  } = useScrollToBottom();
+function PureMessages({ messages, loading }: MessagesProps) {
+  const { elementRef: latestMessageRef, scrollToView } = useScrollToView();
+  const previousMessagesLengthRef = useRef(0);
 
+  // Memoize expensive calculations
+  const { hasMessages, shouldShowThinkingMessage } = useMemo(() => {
+    const hasMessages = messages.length > 0;
+    const lastMessage = messages[messages.length - 1];
+    const shouldShowThinkingMessage =
+      lastMessage?.id?.startsWith(TEMP_MSG_ID_PREFIX);
+
+    return {
+      hasMessages,
+      shouldShowThinkingMessage,
+    };
+  }, [messages]);
+
+  // Memoize message rendering
+  const renderedMessages = useMemo(() => {
+    return messages.map((message, index) => (
+      <div
+        key={`${message.id}-${index}`}
+        ref={index === messages.length - 1 ? latestMessageRef : undefined}
+        className="scroll-mt-4"
+      >
+        <PreviewMessage
+          message={message}
+          requiresScrollPadding={hasMessages && index === messages.length - 1}
+        />
+      </div>
+    ));
+  }, [messages, hasMessages, latestMessageRef]);
+
+  // Smooth scroll only when a new user message is added
   useEffect(() => {
-    scrollToBottom("instant");
-  }, [scrollToBottom]);
+    const isNewMessage = messages.length > previousMessagesLengthRef.current;
 
-  const hasSentMessage = messages?.length > 0;
-  const lastMessage = messages?.[messages.length - 1];
+    if (isNewMessage) {
+      const last = messages[messages.length - 1];
+      scrollToView({
+        behavior: last?.is_user ? "smooth" : "instant",
+        block: "start",
+      });
+    }
+
+    previousMessagesLengthRef.current = messages.length;
+  }, [messages, scrollToView]);
 
   return (
-    <div
-      ref={messagesContainerRef}
-      className="flex flex-col min-w-0 gap-6 flex-1 overflow-y-scroll pt-4 relative"
-    >
-      {!hasSentMessage && !loading && <Greeting />}
+    <div className="flex flex-col flex-1 gap-6 min-w-0 overflow-y-scroll pt-4 relative">
+      {!hasMessages && !loading && <Greeting />}
 
-      {messages?.map((message, index) => (
-        <PreviewMessage
-          key={message.id}
-          message={message}
-          requiresScrollPadding={
-            hasSentMessage && index === messages.length - 1
-          }
-        />
-      ))}
+      {renderedMessages}
 
-      {messages?.length > 0 &&
-        lastMessage?.id.startsWith(TEMP_MSG_ID_PREFIX) && <ThinkingMessage />}
+      {shouldShowThinkingMessage && <ThinkingMessage />}
 
-      <motion.div
-        ref={messagesEndRef}
-        className="shrink-0 min-w-[24px] min-h-[24px]"
-        onViewportLeave={onViewportLeave}
-        onViewportEnter={onViewportEnter}
-      />
+      <motion.div className="shrink-0 min-w-[24px] min-h-[24px]" />
     </div>
   );
 }
+
 export const Messages = memo(PureMessages);
