@@ -28,10 +28,12 @@ const PurePreviewMessage = ({
         initial={{ y: 5, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         data-role={role}
+        role="article"
+        aria-label={`Message from ${role}`}
       >
         <div
           className={cn(
-            "flex gap-4 w-full group-data-[role=user]/message:ml-auto group-data-[role=user]/message:max-w-2xl",
+            "flex gap-4 w-full group-data-[role=user]/message:ml-auto group-data-[role=user]/message:max-w-[70%]",
             {
               "group-data-[role=user]/message:w-fit": true,
             },

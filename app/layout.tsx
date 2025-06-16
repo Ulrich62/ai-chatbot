@@ -7,9 +7,9 @@ import "./globals.css";
 import { QueryProvider } from "@/providers/QueryProvider";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://chat.vercel.ai"),
-  title: "Next.js Chatbot Template",
-  description: "Next.js chatbot template using the AI SDK.",
+  metadataBase: new URL("https://bgds-assistant.vercel.app"),
+  title: "BGDS Assistant",
+  description: "BGDS Assistant",
 };
 
 export const viewport = {
