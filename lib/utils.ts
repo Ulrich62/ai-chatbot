@@ -6,8 +6,6 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-
-
 export function getLocalStorage(key: string) {
   if (typeof window !== 'undefined') {
     return JSON.parse(localStorage.getItem(key) || '[]');
@@ -23,8 +21,7 @@ export function generateUUID(): string {
   });
 }
 
-
 export function sanitizeText(text: string) {
   const parsedText = parseUnicodeString(text);
-  return parsedText.replace('<has_function_call>', '');
+  return parsedText?.replace('<has_function_call>', '');
 }

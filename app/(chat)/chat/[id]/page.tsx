@@ -14,6 +14,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
     isSendMessagePending,
     isMessagesLoading,
     sendMessage,
+    streamStatus,
   } = useMessages(id);
 
   const handleSendMessage = (message: string) => {
@@ -31,6 +32,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
         messages={messages}
         loading={isMessagesLoading}
         status={MESSAGE_STATUS.READY}
+        streamStatus={streamStatus}
       />
 
       <form className="flex mx-auto px-4 bg-background pb-4 md:pb-6 gap-2 w-full md:max-w-3xl">
