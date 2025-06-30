@@ -41,7 +41,13 @@ export const useMessages = (chatId?: string) => {
       };
       addMessages([tempMessage]);
 
-      return sendMessageApi(chatId as string, [message]);
+      // Create payload with pending messages
+      const payload: ChatMessagePayload = {
+        chatId: chatId as string,
+        messages: [message],
+      };
+
+      return sendMessageApi(payload);
     },
     onSuccess: (data: Message[]) => {
       const reply = data.find((message: Message) => !message.is_user);

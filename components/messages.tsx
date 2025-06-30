@@ -4,7 +4,7 @@ import { memo, useEffect, useRef, useMemo } from "react";
 import { motion } from "framer-motion";
 import { TEMP_MSG_ID_PREFIX } from "@/constants";
 import { useScrollToView } from "@/hooks/use-scroll-to-view";
-import { MESSAGE_STATUS } from "@/enums";
+import type { MESSAGE_STATUS } from "@/enums";
 
 interface MessagesProps {
   messages: Array<Message>;
