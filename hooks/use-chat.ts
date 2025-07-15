@@ -1,5 +1,5 @@
 import { useInfiniteQuery, useMutation } from '@tanstack/react-query';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { createChat as createChatApi, getChatHistory } from '@/apis/chat-api';
 import { toast } from '@/components/toast';
 import { TEMP_MSG_ID_PREFIX } from '@/constants';
@@ -14,7 +14,7 @@ interface UseChatOptions {
 }
 
 export const useChat = ({ enabled = true, search }: UseChatOptions = {}) => {
-  const { chats, addChat, addChatsToEnd } = useChatStore();
+  const { chats, addChat, addChatsToEnd, setChats, clearChats } = useChatStore();
 
   const {
     messages: chatMessages,
@@ -103,9 +103,15 @@ export const useChat = ({ enabled = true, search }: UseChatOptions = {}) => {
     enabled,
   });
 
-  // Sync fetched data with chat store
+  // Get all chats from React Query data
+  const allChatsFromQuery = useMemo(() => {
+    if (!data?.pages) return [];
+    return data.pages.flatMap((page) => page.items);
+  }, [data]);
+
+  // Sync fetched data with chat store - but only for non-search scenarios
   useEffect(() => {
-    if (data?.pages) {
+    if (data?.pages && !search) {
       const allChats = data.pages.flatMap((page) => page.items);
 
       // Only add chats that aren't already in the store to avoid duplicates
@@ -116,7 +122,23 @@ export const useChat = ({ enabled = true, search }: UseChatOptions = {}) => {
         addChatsToEnd(newChats);
       }
     }
-  }, [data, chats, addChatsToEnd]);
+  }, [data, chats, addChatsToEnd, search]);
+
+  // Clear store when search changes (but not on initial load)
+  useEffect(() => {
+    if (search !== undefined && search !== '') {
+      // For search, we'll use the query data directly instead of the store
+      return;
+    }
+  }, [search]);
+
+  // Reset store when search is cleared to show all chats again
+  useEffect(() => {
+    if (search === '') {
+      // When search is cleared, we should show all chats from the store
+      // The store will be populated by the first useEffect when data is loaded
+    }
+  }, [search]);
 
   const handleLoadMore = useCallback(() => {
     if (!isFetchingNextPage && hasNextPage) {
@@ -124,20 +146,23 @@ export const useChat = ({ enabled = true, search }: UseChatOptions = {}) => {
     }
   }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
+  // Use chats from query when searching, otherwise from store
+  const displayChats = search ? allChatsFromQuery : chats;
+
   // Use chats from store instead of React Query data
   const hasReachedEnd = !hasNextPage;
 
-  const hasEmptyChatHistory = !isLoading && chats.length === 0;
+  const hasEmptyChatHistory = !isLoading && displayChats.length === 0;
 
   const needsManualLoad =
-    hasNextPage && !isFetchingNextPage && chats.length < 15;
+    hasNextPage && !isFetchingNextPage && displayChats.length < 15;
 
   return {
     createChat,
     isCreateChatPending,
     chatMessages,
 
-    chats,
+    chats: displayChats,
     isLoading,
     isFetchingNextPage,
     hasReachedEnd,

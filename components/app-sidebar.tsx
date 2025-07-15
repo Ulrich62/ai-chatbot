@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 import { PlusIcon } from "@/components/icons";
 import { SidebarHistory } from "@/components/sidebar-history";
@@ -46,9 +47,13 @@ export function AppSidebar() {
               onClick={handleLogoClick}
               className="flex flex-row gap-3 items-center"
             >
-              <span className="text-lg font-semibold px-2 hover:bg-muted rounded-md">
-                BGDS Assistant
-              </span>
+              <Image
+                src="/images/logo.png"
+                alt="My Binhas"
+                width={120}
+                height={32}
+                className="px-2 rounded-md"
+              />
             </button>
             {isMobile ? (
               <Button

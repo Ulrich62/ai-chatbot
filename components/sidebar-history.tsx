@@ -55,8 +55,9 @@ export function SidebarHistory() {
       <SidebarGroup>
         <SidebarGroupContent>
           <div className="px-2 text-zinc-500 w-full flex flex-row justify-center items-center text-sm gap-2 mt-4">
-            Toutes vos conversations apparaîtront ici une fois que vous
-            commencerai à discuter!
+            {search
+              ? `Aucune conversation trouvée pour "${search}"`
+              : "Toutes vos conversations apparaîtront ici une fois que vous commencerai à discuter!"}
           </div>
         </SidebarGroupContent>
       </SidebarGroup>

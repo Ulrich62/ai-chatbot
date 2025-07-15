@@ -30,7 +30,7 @@ export function SidebarUserNav() {
     return <div className="p-4">Chargement...</div>;
   }
   if (error || !user) {
-    return <div className="p-4 text-red-500">Non authentifié</div>;
+    return null;
   }
 
   const isGuest = guestRegex.test(user?.email ?? "");
@@ -85,7 +85,7 @@ export function SidebarUserNav() {
                   }
                 }}
               >
-                {isGuest ? "Login to your account" : "Sign out"}
+                {isGuest ? "Se connecter" : "Se déconnecter"}
               </button>
             </DropdownMenuItem>
           </DropdownMenuContent>

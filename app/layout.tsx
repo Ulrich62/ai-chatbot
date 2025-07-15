@@ -8,8 +8,13 @@ import { QueryProvider } from "@/providers/QueryProvider";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://bgds-assistant.vercel.app"),
-  title: "BGDS Assistant",
-  description: "BGDS Assistant",
+  title: "My Binhas",
+  description: "My Binhas - Assistant intelligent pour vos questions",
+  icons: {
+    icon: "/images/icone.png",
+    shortcut: "/images/icone.png",
+    apple: "/images/icone.png",
+  },
 };
 
 export const viewport = {
