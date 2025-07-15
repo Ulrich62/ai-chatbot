@@ -12,12 +12,14 @@ export function AuthForm({
   action,
   children,
   defaultEmail = "",
+  loading = false,
 }: {
   action: NonNullable<
     string | ((formData: FormData) => void | Promise<void>) | undefined
   >;
   children: React.ReactNode;
   defaultEmail?: string;
+  loading?: boolean;
 }) {
   const [showPassword, setShowPassword] = useState(false);
 
@@ -78,6 +80,14 @@ export function AuthForm({
       </div>
 
       {children}
+
+      <button
+        type="submit"
+        className="w-full bg-[#1C539B] text-white py-2 rounded hover:bg-[#1C539B] transition disabled:opacity-50 disabled:cursor-not-allowed"
+        disabled={loading}
+      >
+        {loading ? "Connexion..." : "Connexion"}
+      </button>
     </Form>
   );
 }

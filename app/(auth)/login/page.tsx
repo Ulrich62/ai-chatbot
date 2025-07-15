@@ -17,11 +17,11 @@ export default function LoginPage() {
     setError("");
 
     const email = formData.get("email") as string;
-    const pass = formData.get("pass") as string;
+    const password = formData.get("password") as string;
 
     const res = await fetch("/api/auth/login", {
       method: "POST",
-      body: JSON.stringify({ email, pass }),
+      body: JSON.stringify({ email, pass: password }),
       headers: { "Content-Type": "application/json" },
     });
     setLoading(false);
@@ -55,7 +55,11 @@ export default function LoginPage() {
             <h2 className="text-2xl font-semibold text-[#1C539B]">Connexion</h2>
           </div>
 
-          <AuthForm action={handleSubmit} defaultEmail={email}>
+          <AuthForm
+            action={handleSubmit}
+            defaultEmail={email}
+            loading={loading}
+          >
             <div className="flex justify-end text-xs mb-2">
               <Link
                 href={env.PASSWORD_RESET_URL || ""}
@@ -66,13 +70,6 @@ export default function LoginPage() {
               </Link>
             </div>
             {error && <div className="text-red-500 text-sm">{error}</div>}
-            <button
-              type="submit"
-              className="w-full bg-[#1C539B] text-white py-2 rounded hover:bg-[#1C539B] transition"
-              disabled={loading}
-            >
-              {loading ? "Connexion..." : "Connexion"}
-            </button>
           </AuthForm>
         </div>
       </div>
