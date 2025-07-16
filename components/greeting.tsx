@@ -1,14 +1,24 @@
 import { motion } from "framer-motion";
+import Image from "next/image";
 
 export const Greeting = () => {
-  const initialMessage = "Bienvenue dans l'assistant de Binhas";
+  const initialMessage =
+    "Revoir un concept, créer un script, clarifier une règle ?";
   const description =
-    "Je suis l'assistant de Binhas, je peux t'aider à trouver des informations dont tu as besoin";
+    "Posez votre question, My Binhas vous guide en s'appuyant sur notre méthode et notre expertise.";
   return (
     <div
       key="overview"
       className="max-w-3xl mx-auto md:mt-20 px-8 size-full flex flex-col justify-center"
     >
+      <Image
+        src="/images/icone.png"
+        alt="My Binhas Logo"
+        width={80}
+        height={80}
+        className="mx-auto mb-6"
+        priority
+      />
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}

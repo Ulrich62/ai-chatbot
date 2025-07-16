@@ -29,7 +29,7 @@ export function SidebarToggle({
           </Button>
         </div>
       </TooltipTrigger>
-      <TooltipContent align="start">Toggle Sidebar</TooltipContent>
+      <TooltipContent align="start">Basculer la barre latérale</TooltipContent>
     </Tooltip>
   );
 }

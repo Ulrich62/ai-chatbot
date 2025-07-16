@@ -4,20 +4,24 @@ import env from "@/utils/env";
 import Link from "next/link";
 import { useState } from "react";
 import Image from "next/image";
+import { AuthForm } from "@/components/auth-form";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("info@denemlabs.com");
-  const [pass, setPass] = useState("7LbS@TJz@5fYH4Q");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  async function handleSubmit(formData: FormData) {
     setLoading(true);
     setError("");
+
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+
     const res = await fetch("/api/auth/login", {
       method: "POST",
-      body: JSON.stringify({ email, pass }),
+      body: JSON.stringify({ email, pass: password }),
       headers: { "Content-Type": "application/json" },
     });
     setLoading(false);
@@ -50,40 +54,12 @@ export default function LoginPage() {
             <span className="text-blue-600 text-3xl font-bold mb-2">🔐</span>
             <h2 className="text-2xl font-semibold text-[#1C539B]">Connexion</h2>
           </div>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label
-                htmlFor="email"
-                className="block text-gray-600 text-sm mb-1"
-              >
-                Email
-              </label>
-              <input
-                id="email"
-                type="email"
-                className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#1C539B]"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                autoFocus
-              />
-            </div>
-            <div>
-              <label
-                htmlFor="password"
-                className="block text-gray-600 text-sm mb-1"
-              >
-                Mot de passe
-              </label>
-              <input
-                id="password"
-                type="password"
-                className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#1C539B]"
-                value={pass}
-                onChange={(e) => setPass(e.target.value)}
-                required
-              />
-            </div>
+
+          <AuthForm
+            action={handleSubmit}
+            defaultEmail={email}
+            loading={loading}
+          >
             <div className="flex justify-end text-xs mb-2">
               <Link
                 href={env.PASSWORD_RESET_URL || ""}
@@ -94,14 +70,7 @@ export default function LoginPage() {
               </Link>
             </div>
             {error && <div className="text-red-500 text-sm">{error}</div>}
-            <button
-              type="submit"
-              className="w-full bg-[#1C539B] text-white py-2 rounded hover:bg-[#1C539B] transition"
-              disabled={loading}
-            >
-              {loading ? "Connexion..." : "Connexion"}
-            </button>
-          </form>
+          </AuthForm>
         </div>
       </div>
     </div>

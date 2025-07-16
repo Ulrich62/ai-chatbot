@@ -50,19 +50,6 @@ export function SidebarHistory() {
     );
   }
 
-  if (hasEmptyChatHistory) {
-    return (
-      <SidebarGroup>
-        <SidebarGroupContent>
-          <div className="px-2 text-zinc-500 w-full flex flex-row justify-center items-center text-sm gap-2 mt-4">
-            Toutes vos conversations apparaîtront ici une fois que vous
-            commencerai à discuter!
-          </div>
-        </SidebarGroupContent>
-      </SidebarGroup>
-    );
-  }
-
   const groupedChats = groupChatsByDate(chats);
 
   return (
@@ -75,7 +62,18 @@ export function SidebarHistory() {
           onChange={(e) => setSearch(e.target.value)}
         />
       </div>
-      {isLoading ? (
+
+      {hasEmptyChatHistory ? (
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <div className="px-2 text-zinc-500 w-full flex flex-row justify-center items-center text-sm gap-2 mt-4">
+              {search
+                ? `Aucune conversation trouvée pour "${search}"`
+                : "Toutes vos conversations apparaîtront ici une fois que vous commencerez à discuter!"}
+            </div>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      ) : isLoading ? (
         <SidebarGroup>
           <div className="px-2 py-1 text-xs text-sidebar-foreground/50">
             Aujourd&apos;hui

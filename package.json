@@ -6,9 +6,8 @@
     "dev": "next dev --turbo",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint && biome lint --write --unsafe",
-    "lint:fix": "next lint --fix && biome lint --write --unsafe",
-    "format": "biome format --write"
+    "lint": "next lint",
+    "lint:fix": "next lint --fix"
   },
   "dependencies": {
     "@ai-sdk/react": "^1.2.11",
@@ -100,8 +99,6 @@
     "zustand": "^5.0.5"
   },
   "devDependencies": {
-    "@biomejs/biome": "1.9.4",
-    "@playwright/test": "^1.50.1",
     "@tailwindcss/typography": "^0.5.15",
     "@types/d3-scale": "^4.0.8",
     "@types/lodash": "^4.17.17",
