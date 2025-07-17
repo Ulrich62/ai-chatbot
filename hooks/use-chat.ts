@@ -1,10 +1,11 @@
-import { useInfiniteQuery, useMutation } from '@tanstack/react-query';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { useCallback, useEffect, useMemo } from 'react';
 import { createChat as createChatApi, getChatHistory } from '@/apis/chat-api';
 import { toast } from '@/components/toast';
-import { TEMP_MSG_ID_PREFIX } from '@/constants';
 import { useChatStore } from '@/store/chat-store';
 import { useMessageStore } from '@/store/message-store';
+import { useStreaming } from './use-streaming';
+import { STREAM_STATUS } from '@/enums';
 
 const DEFAULT_PAGE_SIZE = 20;
 
@@ -14,63 +15,38 @@ interface UseChatOptions {
 }
 
 export const useChat = ({ enabled = true, search }: UseChatOptions = {}) => {
-  const { chats, addChat, addChatsToEnd, setChats, clearChats } = useChatStore();
-
+  const { chats, addChatsToEnd } = useChatStore();
   const {
     messages: chatMessages,
-    addMessages,
     clearMessages,
-  } = useMessageStore.getState();
+    streamStatus,
+  } = useMessageStore();
+  const { startStreaming } = useStreaming();
 
-  const { mutateAsync: createChat, isPending: isCreateChatPending } =
-    useMutation<Chat, Error, NewChat>({
-      mutationFn: (newChat: NewChat) => {
-        // Generate a unique temporary ID
-        const tempId = `${TEMP_MSG_ID_PREFIX}_${Date.now()}`;
-
+  const createChat = useCallback(
+    async (newChat: NewChat) => {
+      try {
         clearMessages();
 
-        // Add current message to UI immediately
-        addMessages([
-          {
-            id: tempId,
-            content: newChat.title,
-            is_user: true,
-            created_at: new Date().toISOString(),
-          },
-        ]);
-
-        // Create payload with pending messages
         const payload: NewChatPayload = {
           title: newChat.title,
-          messages: [
-            {
-              content: newChat.title,
-              is_user: true,
-            },
-          ],
+          messages: [{ content: newChat.title, is_user: true }],
         };
-
-        return createChatApi(payload);
-      },
-      onSuccess: (data) => {
-        addChat(data);
-
-        if (data?.messages) {
-          const reply = data?.messages.find((message) => !message.is_user);
-          reply && addMessages([reply]);
-        }
-      },
-      onError: (error) => {
+        await startStreaming(
+          () => createChatApi(payload),
+          newChat.title,
+        );
+      } catch (error) {
         console.error(error);
-
         toast({
           type: 'error',
           description:
             'Une erreur est survenue lors de la création de la conversation',
         });
-      },
-    });
+      }
+    },
+    [startStreaming, clearMessages],
+  );
 
   // Infinite chat history query
   const {
@@ -151,15 +127,14 @@ export const useChat = ({ enabled = true, search }: UseChatOptions = {}) => {
 
   // Use chats from store instead of React Query data
   const hasReachedEnd = !hasNextPage;
-
-  const hasEmptyChatHistory = !isLoading && displayChats.length === 0;
-
+  const hasEmptyChatHistory = !isLoading && chats.length === 0;
   const needsManualLoad =
     hasNextPage && !isFetchingNextPage && displayChats.length < 15;
 
   return {
     createChat,
-    isCreateChatPending,
+    isCreateChatPending:
+      streamStatus === STREAM_STATUS.STREAMING || streamStatus === STREAM_STATUS.STARTING || streamStatus === STREAM_STATUS.TRANSITIONING,
     chatMessages,
 
     chats: displayChats,
@@ -172,5 +147,6 @@ export const useChat = ({ enabled = true, search }: UseChatOptions = {}) => {
     refetch,
     isError,
     error,
+    streamStatus,
   } as const;
 };

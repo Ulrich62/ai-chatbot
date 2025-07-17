@@ -24,7 +24,7 @@ import {
 export function SidebarUserNav() {
   const router = useRouter();
   const { setTheme, resolvedTheme } = useTheme();
-  const { user, loading, error } = useAuth();
+  const { user, loading, error, logout } = useAuth();
 
   if (loading) {
     return <div className="p-4">Chargement...</div>;
@@ -34,6 +34,23 @@ export function SidebarUserNav() {
   }
 
   const isGuest = guestRegex.test(user?.email ?? "");
+
+  const handleAuthAction = async () => {
+    if (loading) {
+      toast({
+        type: "error",
+        description:
+          "Vérification du statut d'authentification, veuillez réessayer !",
+      });
+      return;
+    }
+
+    if (isGuest) {
+      router.push("/login");
+    } else {
+      await logout();
+    }
+  };
 
   return (
     <SidebarMenu>
@@ -67,23 +84,7 @@ export function SidebarUserNav() {
               <button
                 type="button"
                 className="w-full cursor-pointer"
-                onClick={() => {
-                  if (loading) {
-                    toast({
-                      type: "error",
-                      description:
-                        "Checking authentication status, please try again!",
-                    });
-                    return;
-                  }
-                  if (isGuest) {
-                    router.push("/login");
-                  } else {
-                    fetch("/api/auth/signout", { method: "POST" }).then(() => {
-                      window.location.href = "/";
-                    });
-                  }
-                }}
+                onClick={handleAuthAction}
               >
                 {isGuest ? "Se connecter" : "Se déconnecter"}
               </button>

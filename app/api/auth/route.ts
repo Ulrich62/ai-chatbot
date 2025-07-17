@@ -1,11 +1,17 @@
 import { type NextRequest, NextResponse } from 'next/server';
-import { decodeJWT } from '@/utils/jwt-decoder';
+import { decodeJWT, isTokenExpired } from '@/utils/jwt-decoder';
 
 export async function GET(req: NextRequest) {
   // Récupérer le token depuis les cookies
   const token = req.cookies.get('token')?.value;
   if (!token) {
     return NextResponse.json({ error: 'Token manquant' }, { status: 401 });
+  }
+
+  // Vérifier si le token est expiré
+  if (isTokenExpired(token)) {
+    console.warn('[AUTH] Token expiré détecté');
+    return NextResponse.json({ error: 'Token expiré' }, { status: 401 });
   }
 
   // Décoder le token

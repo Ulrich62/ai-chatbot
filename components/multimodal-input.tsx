@@ -109,7 +109,7 @@ function PureMultimodalInput({
   );
 
   const isSubmitting = loading;
-  const canSend = input.trim().length > 0;
+  const canSend = input.trim().length > 0 && !isSubmitting;
 
   return (
     <div className="relative w-full flex flex-col gap-4">
@@ -143,7 +143,7 @@ function PureMultimodalInput({
           className,
         )}
         rows={2}
-        onKeyDown={handleKeyDown}
+        onKeyDown={isSubmitting ? undefined : handleKeyDown}
       />
 
       <div className="absolute bottom-0 right-0 p-2 w-fit flex flex-row justify-end">

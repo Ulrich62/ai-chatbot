@@ -16,23 +16,34 @@ export default function LoginPage() {
     setLoading(true);
     setError("");
 
-    const email = formData.get("email") as string;
-    const password = formData.get("password") as string;
+    const emailValue = formData.get("email") as string;
+    const passwordValue = formData.get("password") as string;
 
-    const res = await fetch("/api/auth/login", {
-      method: "POST",
-      body: JSON.stringify({ email, pass: password }),
-      headers: { "Content-Type": "application/json" },
-    });
-    setLoading(false);
-    if (res.ok) {
-      const data = await res.json();
-      if (data.token) {
-        document.cookie = `token=${data.token}; path=/; secure; samesite=strict`;
+    // Mettre à jour les states pour garder les valeurs
+    setEmail(emailValue);
+    setPassword(passwordValue);
+
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        body: JSON.stringify({ email: emailValue, password: passwordValue }),
+        headers: { "Content-Type": "application/json" },
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.token) {
+          document.cookie = `token=${data.token}; path=/; secure; samesite=strict`;
+        }
+        window.location.href = "/";
+      } else {
+        const errorData = await res.json();
+        setError(errorData.error || "Identifiants invalides");
       }
-      window.location.href = "/";
-    } else {
-      setError("Identifiants invalides");
+    } catch (err) {
+      setError("Erreur de connexion. Veuillez réessayer.");
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -57,8 +68,12 @@ export default function LoginPage() {
 
           <AuthForm
             action={handleSubmit}
-            defaultEmail={email}
+            email={email}
+            password={password}
+            onEmailChange={setEmail}
+            onPasswordChange={setPassword}
             loading={loading}
+            error={error}
           >
             <div className="flex justify-end text-xs mb-2">
               <Link
@@ -69,7 +84,6 @@ export default function LoginPage() {
                 Mot de passe oublié ?
               </Link>
             </div>
-            {error && <div className="text-red-500 text-sm">{error}</div>}
           </AuthForm>
         </div>
       </div>

@@ -9,3 +9,12 @@ export enum MESSAGE_STATUS {
   STREAMING = 'streaming',
   ERROR = 'error',
 }
+
+export enum STREAM_STATUS {
+  IDLE = 'idle',
+  STARTING = 'starting',
+  STREAMING = 'streaming',
+  TRANSITIONING = 'transitioning',
+  COMPLETED = 'completed',
+  ERROR = 'error',
+}
