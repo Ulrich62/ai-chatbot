@@ -16,7 +16,6 @@ export function useScrollToView() {
       inline = 'nearest',
     } = options;
 
-    console.log("scrollToView", behavior, block, inline);
     elementRef.current?.scrollIntoView({
       behavior,
       block,

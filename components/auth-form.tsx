@@ -1,25 +1,28 @@
 "use client";
 
 import { useState } from "react";
-import { Eye, EyeOff } from "lucide-react";
-import Form from "next/form";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
 import { Button } from "./ui/button";
 
 export function AuthForm({
   action,
   children,
-  defaultEmail = "",
+  email = "",
+  password = "",
+  onEmailChange,
+  onPasswordChange,
   loading = false,
+  error = "",
 }: {
-  action: NonNullable<
-    string | ((formData: FormData) => void | Promise<void>) | undefined
-  >;
+  action: (formData: FormData) => Promise<void>;
   children: React.ReactNode;
-  defaultEmail?: string;
+  email?: string;
+  password?: string;
+  onEmailChange?: (value: string) => void;
+  onPasswordChange?: (value: string) => void;
   loading?: boolean;
+  error?: string;
 }) {
   const [showPassword, setShowPassword] = useState(false);
 
@@ -27,8 +30,22 @@ export function AuthForm({
     setShowPassword(!showPassword);
   };
 
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onEmailChange?.(e.target.value);
+  };
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onPasswordChange?.(e.target.value);
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    await action(formData);
+  };
+
   return (
-    <Form action={action} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4">
       <div>
         <label htmlFor="email" className="block text-gray-600 text-sm mb-1">
           Email
@@ -37,12 +54,14 @@ export function AuthForm({
           id="email"
           name="email"
           type="email"
-          className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#1C539B]"
+          className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#1C539B] disabled:opacity-50 disabled:cursor-not-allowed"
           placeholder="user@acme.com"
           autoComplete="email"
           required
           autoFocus
-          defaultValue={defaultEmail}
+          value={email}
+          onChange={handleEmailChange}
+          disabled={loading}
         />
       </div>
 
@@ -55,15 +74,19 @@ export function AuthForm({
             id="password"
             name="password"
             type={showPassword ? "text" : "password"}
-            className="w-full border rounded px-3 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-[#1C539B]"
+            className="w-full border rounded px-3 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-[#1C539B] disabled:opacity-50 disabled:cursor-not-allowed"
             required
+            value={password}
+            onChange={handlePasswordChange}
+            disabled={loading}
           />
           <Button
             type="button"
             variant="ghost"
             size="sm"
-            className="absolute right-2 top-1/2 -translate-y-1/2 h-6 w-6 p-0 hover:bg-gray-100"
+            className="absolute right-2 top-1/2 -translate-y-1/2 size-6 p-0 hover:bg-gray-100 disabled:opacity-50"
             onClick={handleTogglePassword}
+            disabled={loading}
             aria-label={
               showPassword
                 ? "Masquer le mot de passe"
@@ -71,9 +94,9 @@ export function AuthForm({
             }
           >
             {showPassword ? (
-              <EyeOff className="h-4 w-4 text-gray-500" />
+              <EyeOff className="size-4 text-gray-500" />
             ) : (
-              <Eye className="h-4 w-4 text-gray-500" />
+              <Eye className="size-4 text-gray-500" />
             )}
           </Button>
         </div>
@@ -81,13 +104,30 @@ export function AuthForm({
 
       {children}
 
+      {error && (
+        <div className="text-red-500 text-sm bg-red-50 border border-red-200 rounded px-3 py-2">
+          {error}
+        </div>
+      )}
+
       <button
         type="submit"
-        className="w-full bg-[#1C539B] text-white py-2 rounded hover:bg-[#1C539B] transition disabled:opacity-50 disabled:cursor-not-allowed"
+        className={`w-full py-2 rounded transition flex items-center justify-center gap-2 ${
+          loading
+            ? "bg-gray-400 text-white cursor-not-allowed"
+            : "bg-[#1C539B] text-white hover:bg-[#1C539B]/90"
+        }`}
         disabled={loading}
       >
-        {loading ? "Connexion..." : "Connexion"}
+        {loading ? (
+          <>
+            <Loader2 className="size-4 animate-spin" />
+            Connexion en cours...
+          </>
+        ) : (
+          "Connexion"
+        )}
       </button>
-    </Form>
+    </form>
   );
 }
