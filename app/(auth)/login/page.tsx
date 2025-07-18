@@ -74,17 +74,7 @@ export default function LoginPage() {
             onPasswordChange={setPassword}
             loading={loading}
             error={error}
-          >
-            <div className="flex justify-end text-xs mb-2">
-              <Link
-                href={env.PASSWORD_RESET_URL || ""}
-                target="_blank"
-                className="text-[#1C539B] hover:underline"
-              >
-                Mot de passe oublié ?
-              </Link>
-            </div>
-          </AuthForm>
+          />
         </div>
       </div>
     </div>

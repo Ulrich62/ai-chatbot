@@ -16,7 +16,7 @@ export function AuthForm({
   error = "",
 }: {
   action: (formData: FormData) => Promise<void>;
-  children: React.ReactNode;
+  children?: React.ReactNode;
   email?: string;
   password?: string;
   onEmailChange?: (value: string) => void;
