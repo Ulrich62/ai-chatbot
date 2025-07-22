@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useWindowSize } from "usehooks-ts";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useMessages } from "@/hooks/use-messages";
 
 import { SidebarToggle } from "@/components/sidebar-toggle";
 import { Button } from "@/components/ui/button";
@@ -31,6 +32,13 @@ function PureChatHeader() {
   const isMobile = useIsMobile();
   const { width: windowWidth } = useWindowSize();
   const [isHelpOpen, setIsHelpOpen] = useState(false);
+  const { clearMessages } = useMessages();
+
+  const handleNewChat = () => {
+    clearMessages();
+    router.push("/");
+    router.refresh();
+  };
 
   const handleHelpLinkClick = () => {
     setIsHelpOpen(false);
@@ -77,14 +85,7 @@ function PureChatHeader() {
           )}
 
           {isMobile ? (
-            <Button
-              variant="outline"
-              className="px-2"
-              onClick={() => {
-                router.push("/");
-                router.refresh();
-              }}
-            >
+            <Button variant="outline" className="px-2" onClick={handleNewChat}>
               <PlusIcon />
             </Button>
           ) : (
@@ -93,10 +94,7 @@ function PureChatHeader() {
                 <Button
                   variant="outline"
                   className="md:px-2 px-2 md:h-fit"
-                  onClick={() => {
-                    router.push("/");
-                    router.refresh();
-                  }}
+                  onClick={handleNewChat}
                 >
                   <PlusIcon />
                 </Button>
