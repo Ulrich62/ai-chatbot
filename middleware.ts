@@ -2,12 +2,20 @@ import { type NextRequest, NextResponse } from 'next/server';
 import { isTokenExpired } from '@/utils/jwt-decoder';
 
 export async function middleware(req: NextRequest) {
+  const pathname = req.nextUrl.pathname;
+  
   const token = req.cookies.get('token')?.value;
   const refreshToken = req.cookies.get('refreshToken')?.value;
-  const isLoginPage = req.nextUrl.pathname.startsWith('/login');
-  const isApi = req.nextUrl.pathname.startsWith('/api');
-  const isStatic = req.nextUrl.pathname.startsWith('/_next') || req.nextUrl.pathname === '/favicon.ico';
-  const isRefreshRoute = req.nextUrl.pathname === '/api/auth/refresh';
+  const isLoginPage = pathname.startsWith('/login');
+  const isApi = pathname.startsWith('/api');
+  const isStatic = pathname.startsWith('/_next') || pathname === '/favicon.ico';
+  const isPWAFile = pathname === '/manifest.json' || pathname === '/sw.js';
+  const isRefreshRoute = pathname === '/api/auth/refresh';
+
+  // Laisser passer les fichiers PWA sans authentification
+  if (isPWAFile) {
+    return NextResponse.next();
+  }
 
   // Si c'est une route statique, API ou login, laisser passer
   if (isLoginPage || isApi || isStatic) {
@@ -91,5 +99,8 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!api|_next|favicon.ico|images|login).*)'],
+  matcher: [
+    // Exclure explicitement les fichiers PWA du matching
+    '/((?!api/|_next/|favicon.ico|images/|login|manifest.json|sw.js).*)',
+  ],
 }; 

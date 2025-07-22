@@ -16,10 +16,24 @@ export const metadata: Metadata = {
     shortcut: "/images/icone.png",
     apple: "/images/icone.png",
   },
+  manifest: "/manifest.json",
+  other: {
+    "mobile-web-app-capable": "yes",
+    "apple-mobile-web-app-capable": "yes",
+    "apple-mobile-web-app-status-bar-style": "default",
+    "apple-mobile-web-app-title": "My Binhas",
+    "application-name": "My Binhas",
+    "msapplication-TileColor": "#000000",
+    "msapplication-config": "none",
+  },
 };
 
 export const viewport = {
   maximumScale: 1, // Disable auto-zoom on mobile Safari
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "hsl(0 0% 100%)" },
+    { media: "(prefers-color-scheme: dark)", color: "hsl(240deg 10% 3.92%)" },
+  ],
 };
 
 const geist = Geist({
