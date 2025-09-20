@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
+import Link from "next/link";
 
 import { Button } from "./ui/button";
+import { PASSWORD_RESET_URL } from "@/constants/global";
 
 export function AuthForm({
   action,
@@ -100,6 +102,16 @@ export function AuthForm({
             )}
           </Button>
         </div>
+        {PASSWORD_RESET_URL && (
+          <div className=" text-right mt-1">
+            <Link
+              href={PASSWORD_RESET_URL}
+              className="text-sm text-[#1C539B] hover:text-[#1C539B]/80 hover:underline"
+            >
+              Mot de passe oublié ?
+            </Link>
+          </div>
+        )}
       </div>
 
       {children}
