@@ -17,7 +17,7 @@ export default function HelpButtonExample() {
             <button className="bg-white text-gray-800 px-6 py-3 rounded-lg font-medium hover:bg-gray-100 transition-colors flex items-center justify-center">
               Vous êtes candidat
               <svg
-                className="w-4 h-4 ml-2"
+                className="size-4 ml-2"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -34,7 +34,7 @@ export default function HelpButtonExample() {
             <button className="bg-white text-gray-800 px-6 py-3 rounded-lg font-medium hover:bg-gray-100 transition-colors flex items-center justify-center">
               Vous êtes un citoyen
               <svg
-                className="w-4 h-4 ml-2"
+                className="size-4 ml-2"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
