@@ -16,6 +16,10 @@ const helpLinks = [
     href: "https://bgds.typeform.com/RetoursMyBinhas",
     label: "Signaler un problème",
   },
+  {
+    href: "https://www.bgds.fr/mentions-cgv-mybinhas/",
+    label: "Conditions générales",
+  },
 ];
 
 export default function HelpButton() {

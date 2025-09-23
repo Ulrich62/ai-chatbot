@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useState } from "react";
 import Image from "next/image";
 import { AuthForm } from "@/components/auth-form";
+import { BottomText } from "@/components/bottom-text";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -48,35 +49,41 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#1c539b20] backdrop-blur-sm">
-      <div className="bg-white rounded-lg shadow-lg flex w-full max-w-3xl overflow-hidden m-4">
-        <div className="hidden md:flex items-center justify-center w-1/2 bg-blue-100">
-          {/* Illustration placeholder */}
-          <Image
-            src="/images/login-illustration.svg"
-            alt="Login Illustration"
-            width={350}
-            height={350}
-            priority
-          />
-        </div>
-        <div className="w-full md:w-1/2 px-8 py-12">
-          <div className="flex flex-col items-center mb-6">
-            <span className="text-blue-600 text-3xl font-bold mb-2">🔐</span>
-            <h2 className="text-2xl font-semibold text-[#1C539B]">Connexion</h2>
+    <div className="min-h-screen flex flex-col bg-[#1c539b20] backdrop-blur-sm">
+      <div className="flex-1 flex items-center justify-center">
+        <div className="bg-white rounded-lg shadow-lg flex w-full max-w-3xl overflow-hidden m-4">
+          <div className="hidden md:flex items-center justify-center w-1/2 bg-blue-100">
+            {/* Illustration placeholder */}
+            <Image
+              src="/images/login-illustration.svg"
+              alt="Login Illustration"
+              width={350}
+              height={350}
+              priority
+            />
           </div>
+          <div className="w-full md:w-1/2 px-8 py-12">
+            <div className="flex flex-col items-center mb-6">
+              <span className="text-blue-600 text-3xl font-bold mb-2">🔐</span>
+              <h2 className="text-2xl font-semibold text-[#1C539B]">
+                Connexion
+              </h2>
+            </div>
 
-          <AuthForm
-            action={handleSubmit}
-            email={email}
-            password={password}
-            onEmailChange={setEmail}
-            onPasswordChange={setPassword}
-            loading={loading}
-            error={error}
-          />
+            <AuthForm
+              action={handleSubmit}
+              email={email}
+              password={password}
+              onEmailChange={setEmail}
+              onPasswordChange={setPassword}
+              loading={loading}
+              error={error}
+            />
+          </div>
         </div>
       </div>
+
+      <BottomText />
     </div>
   );
 }

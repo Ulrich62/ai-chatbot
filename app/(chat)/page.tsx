@@ -2,6 +2,7 @@
 import { ChatHeader } from "@/components/chat-header";
 import { Messages } from "@/components/messages";
 import { MultimodalInput } from "@/components/multimodal-input";
+import { BottomText } from "@/components/bottom-text";
 import { MESSAGE_STATUS } from "@/enums";
 import { useChat } from "@/hooks/use-chat";
 import { useMessages } from "@/hooks/use-messages";
@@ -55,6 +56,8 @@ export default function Page() {
           sendMessage={handleCreateChat}
         />
       </form>
+
+      {isNewChat && <BottomText />}
     </div>
   );
 }

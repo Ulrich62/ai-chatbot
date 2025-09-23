@@ -79,6 +79,16 @@ export function SidebarUserNav() {
             side="top"
             className="w-[--radix-popper-anchor-width]"
           >
+            <DropdownMenuItem asChild>
+              <a
+                href="https://www.bgds.fr/mentions-cgv-mybinhas/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full cursor-pointer"
+              >
+                Conditions générales
+              </a>
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild data-testid="user-nav-item-auth">
               <button

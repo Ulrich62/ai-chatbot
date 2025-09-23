@@ -1,8 +1,9 @@
 "use client";
-import React, { use } from "react";
+import React, { use, useMemo } from "react";
 import { ChatHeader } from "@/components/chat-header";
 import { Messages } from "@/components/messages";
 import { MultimodalInput } from "@/components/multimodal-input";
+import { BottomText } from "@/components/bottom-text";
 import { MESSAGE_STATUS } from "@/enums";
 import { useMessages } from "@/hooks/use-messages";
 
@@ -16,6 +17,10 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
     sendMessage,
     streamStatus,
   } = useMessages(id);
+
+  const isNewChat = useMemo(() => {
+    return !messages.length;
+  }, [messages.length]);
 
   const handleSendMessage = (message: string) => {
     sendMessage({
@@ -41,6 +46,8 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
           sendMessage={handleSendMessage}
         />
       </form>
+
+      {isNewChat && <BottomText />}
     </div>
   );
 }
