@@ -39,23 +39,15 @@ export function InstallBanner({ debug = false }: InstallBannerProps) {
     (debug || (canShowBanner && user && !loading && !isInstalled)) &&
     !isDismissed;
 
-  // Auto-dismiss après 10 secondes et vibration sur mobile (désactivé en mode debug)
+  // Vibration légère sur mobile quand la bannière apparaît (pas d'auto-dismiss)
   useEffect(() => {
     if (isVisible && !debug) {
-      // Vibration légère sur mobile
+      // Vibration légère sur mobile pour attirer l'attention
       if ("vibrate" in navigator) {
         navigator.vibrate(50); // 50ms de vibration
       }
-
-      // Auto-dismiss après 10 secondes
-      const timer = setTimeout(() => {
-        dismissBanner();
-        setIsDismissed(true);
-      }, 10000);
-
-      return () => clearTimeout(timer);
     }
-  }, [isVisible, debug, dismissBanner]);
+  }, [isVisible, debug]);
 
   // Note: Pas de réinitialisation automatique si l'utilisateur a fermé délibérément
   // La bannière ne réapparaîtra que si l'utilisateur désinstalle l'app et revient
