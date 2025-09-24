@@ -25,7 +25,6 @@ export const metadata: Metadata = {
     "application-name": "My Binhas",
     "msapplication-TileColor": "#000000",
     "msapplication-config": "none",
-    "apple-touch-fullscreen": "yes",
     "format-detection": "telephone=no",
   },
 };

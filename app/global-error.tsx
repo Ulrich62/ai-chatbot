@@ -30,15 +30,15 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
         <div className="min-h-screen flex items-center justify-center p-4 bg-background">
           <Card className="w-full max-w-md mx-auto">
             <CardHeader className="text-center">
-              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#1C539B]/10">
-                <AlertTriangle className="h-8 w-8 text-[#1C539B]" />
+              <div className="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-[#1C539B]/10">
+                <AlertTriangle className="size-8 text-[#1C539B]" />
               </div>
               <CardTitle className="text-2xl font-bold text-[#1C539B]">
                 Erreur critique
               </CardTitle>
               <CardDescription className="text-muted-foreground">
-                Une erreur inattendue s'est produite. Veuillez actualiser la
-                page ou revenir à l'accueil.
+                Une erreur inattendue s&apos;est produite. Veuillez actualiser
+                la page ou revenir à l&apos;accueil.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -49,7 +49,7 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
                   </p>
                   {error.digest && (
                     <p className="text-xs text-muted-foreground mt-1">
-                      ID d'erreur: {error.digest}
+                      ID d&apos;erreur: {error.digest}
                     </p>
                   )}
                 </div>
@@ -61,7 +61,7 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
                   className="flex-1 bg-[#1C539B] hover:bg-[#1C539B]/90 text-white"
                   variant="default"
                 >
-                  <RefreshCw className="h-4 w-4 mr-2" />
+                  <RefreshCw className="size-4 mr-2" />
                   Réessayer
                 </Button>
                 <Button
@@ -69,8 +69,8 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
                   className="flex-1 border-[#1C539B] text-[#1C539B] hover:bg-[#1C539B]/10"
                   variant="outline"
                 >
-                  <Home className="h-4 w-4 mr-2" />
-                  Retour à l'accueil
+                  <Home className="size-4 mr-2" />
+                  Retour à l&apos;accueil
                 </Button>
               </div>
 
