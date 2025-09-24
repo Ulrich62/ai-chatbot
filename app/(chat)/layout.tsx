@@ -7,7 +7,7 @@ export const experimental_ppr = true;
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider defaultOpen={true}>
-      <InstallBanner />
+      <InstallBanner debug={process.env.NODE_ENV === "development"} />
       <AppSidebar />
       <SidebarInset>{children}</SidebarInset>
     </SidebarProvider>

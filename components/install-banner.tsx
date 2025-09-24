@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useSidebar } from "@/components/ui/sidebar";
+import { usePWAInstall } from "@/hooks/use-pwa-install";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
@@ -20,71 +21,23 @@ export function InstallBanner({ debug = false }: InstallBannerProps) {
   const { user, loading } = useAuth();
   const isMobile = useIsMobile();
   const { open: sidebarOpen } = useSidebar();
-  const [installPrompt, setInstallPrompt] =
-    useState<BeforeInstallPromptEvent | null>(null);
-  const [isVisible, setIsVisible] = useState(false);
   const [isInstalling, setIsInstalling] = useState(false);
+  const [isDismissed, setIsDismissed] = useState(false);
 
-  useEffect(() => {
-    // En mode debug, forcer l'affichage
-    if (debug) {
-      setIsVisible(true);
-      setInstallPrompt({} as BeforeInstallPromptEvent); // Mock pour le debug
-      return;
-    }
+  const {
+    isInstallable,
+    isInstalled,
+    installPrompt,
+    canShowBanner,
+    installApp,
+    dismissBanner,
+    resetInstallState,
+  } = usePWAInstall();
 
-    // Vérifier si la bannière a été fermée précédemment
-    const bannerDismissed = localStorage.getItem("install-banner-dismissed");
-    if (bannerDismissed === "true") {
-      return;
-    }
-
-    // Écouter l'événement beforeinstallprompt
-    const handleBeforeInstallPrompt = (e: Event) => {
-      e.preventDefault();
-      setInstallPrompt(e as BeforeInstallPromptEvent);
-
-      // Afficher la bannière seulement si l'utilisateur est connecté
-      if (user && !loading) {
-        setIsVisible(true);
-      }
-    };
-
-    // Écouter l'événement d'installation réussie
-    const handleAppInstalled = () => {
-      setIsVisible(false);
-      setInstallPrompt(null);
-      localStorage.setItem("install-banner-dismissed", "true");
-    };
-
-    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
-    window.addEventListener("appinstalled", handleAppInstalled);
-
-    return () => {
-      window.removeEventListener(
-        "beforeinstallprompt",
-        handleBeforeInstallPrompt,
-      );
-      window.removeEventListener("appinstalled", handleAppInstalled);
-    };
-  }, [user, loading, debug]);
-
-  // Masquer la bannière si l'utilisateur n'est pas connecté (sauf en mode debug)
-  useEffect(() => {
-    if (debug) {
-      setIsVisible(true);
-      return;
-    }
-
-    if (!user || loading) {
-      setIsVisible(false);
-    } else if (
-      installPrompt &&
-      localStorage.getItem("install-banner-dismissed") !== "true"
-    ) {
-      setIsVisible(true);
-    }
-  }, [user, loading, installPrompt, debug]);
+  // Déterminer si la bannière doit être visible
+  const isVisible =
+    (debug || (canShowBanner && user && !loading && !isInstalled)) &&
+    !isDismissed;
 
   // Auto-dismiss après 10 secondes et vibration sur mobile (désactivé en mode debug)
   useEffect(() => {
@@ -96,13 +49,16 @@ export function InstallBanner({ debug = false }: InstallBannerProps) {
 
       // Auto-dismiss après 10 secondes
       const timer = setTimeout(() => {
-        setIsVisible(false);
-        localStorage.setItem("install-banner-dismissed", "true");
+        dismissBanner();
+        setIsDismissed(true);
       }, 10000);
 
       return () => clearTimeout(timer);
     }
-  }, [isVisible, debug]);
+  }, [isVisible, debug, dismissBanner]);
+
+  // Note: Pas de réinitialisation automatique si l'utilisateur a fermé délibérément
+  // La bannière ne réapparaîtra que si l'utilisateur désinstalle l'app et revient
 
   // Ajouter/retirer une classe au body pour pousser le contenu sur desktop
   useEffect(() => {
@@ -124,38 +80,87 @@ export function InstallBanner({ debug = false }: InstallBannerProps) {
       setIsInstalling(true);
       setTimeout(() => {
         setIsInstalling(false);
-        setIsVisible(false);
+        setIsDismissed(true); // Fermer la bannière après simulation
       }, 2000);
       return;
     }
 
-    if (!installPrompt) return;
+    // Détecter la plateforme
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const isAndroid = /Android/.test(navigator.userAgent);
+    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 
     setIsInstalling(true);
-    try {
-      await installPrompt.prompt();
-      const choiceResult = await installPrompt.userChoice;
 
-      if (choiceResult.outcome === "accepted") {
-        console.log("L&apos;utilisateur a accepté l&apos;installation");
-        setIsVisible(false);
-        localStorage.setItem("install-banner-dismissed", "true");
+    try {
+      // Pour iOS Safari, on ne peut pas déclencher l'installation automatiquement
+      if (isIOS && isSafari) {
+        // Afficher les instructions pour iOS
+        alert(
+          "Pour installer My Binhas sur votre iPhone :\n\n" +
+            "1. Appuyez sur le bouton de partage (carré avec flèche vers le haut)\n" +
+            "2. Faites défiler et sélectionnez 'Ajouter à l'écran d'accueil'\n" +
+            "3. Appuyez sur 'Ajouter'",
+        );
+        dismissBanner();
+        setIsInstalling(false);
+        return;
+      }
+
+      // Pour Android Chrome/Edge avec beforeinstallprompt
+      if (isInstallable && installPrompt) {
+        const success = await installApp();
+        if (success) {
+          console.log("L'utilisateur a accepté l'installation");
+          dismissBanner();
+        } else {
+          console.log("L'utilisateur a refusé l'installation");
+        }
       } else {
-        console.log("L&apos;utilisateur a refusé l&apos;installation");
+        // Fallback pour les autres navigateurs Android
+        if (isAndroid) {
+          alert(
+            "Pour installer My Binhas sur votre appareil Android :\n\n" +
+              "1. Ouvrez le menu du navigateur (trois points)\n" +
+              "2. Sélectionnez 'Ajouter à l'écran d'accueil' ou 'Installer l'application'\n" +
+              "3. Suivez les instructions à l'écran",
+          );
+        } else {
+          alert(
+            "Pour installer My Binhas :\n\n" +
+              "1. Ouvrez le menu de votre navigateur\n" +
+              "2. Recherchez l'option 'Installer l'application' ou 'Ajouter à l'écran d'accueil'\n" +
+              "3. Suivez les instructions à l'écran",
+          );
+        }
+        dismissBanner();
       }
     } catch (error) {
       console.error("Erreur lors de l'installation:", error);
+      alert(
+        "Une erreur est survenue lors de l'installation. Veuillez essayer manuellement via le menu de votre navigateur.",
+      );
     } finally {
       setIsInstalling(false);
-      setInstallPrompt(null);
     }
   };
 
   const handleDismiss = () => {
-    setIsVisible(false);
-    if (!debug) {
-      localStorage.setItem("install-banner-dismissed", "true");
+    if (debug) {
+      // En mode debug, masquer la bannière temporairement
+      setIsDismissed(true);
+      return;
     }
+    // En production, fermer définitivement la bannière
+    // L'utilisateur a fait un choix délibéré, ne plus proposer l'installation
+    dismissBanner();
+    setIsDismissed(true);
+  };
+
+  // Fonction pour réinitialiser manuellement l'état (utile pour les tests)
+  const resetInstallBanner = () => {
+    resetInstallState();
+    setIsDismissed(false);
   };
 
   // Ne pas afficher la bannière si les conditions ne sont pas remplies (sauf en mode debug)
@@ -173,6 +178,15 @@ export function InstallBanner({ debug = false }: InstallBannerProps) {
               DEBUG
             </div>
           )}
+          {debug && (
+            <button
+              onClick={resetInstallBanner}
+              className="absolute -top-2 -left-2 bg-blue-500 text-white text-xs px-2 py-1 rounded-full hover:bg-blue-600"
+              title="Réinitialiser l'état d'installation"
+            >
+              RESET
+            </button>
+          )}
 
           <Download className="size-5 text-blue-600 shrink-0" />
 
@@ -188,17 +202,19 @@ export function InstallBanner({ debug = false }: InstallBannerProps) {
               disabled={isInstalling}
               size="sm"
               variant="outline"
-              className="text-sm whitespace-nowrap"
+              className="text-sm whitespace-nowrap border-blue-600 text-blue-600 hover:bg-blue-50"
             >
               {isInstalling ? "..." : "Installer"}
             </Button>
-            <button
+            <Button
               onClick={handleDismiss}
-              className="p-1 text-blue-600 hover:text-blue-800"
+              size="sm"
+              variant="ghost"
+              className="p-1 text-blue-600 hover:text-blue-800 hover:bg-blue-50 size-8"
               aria-label="Fermer"
             >
               <X className="size-4" />
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -210,7 +226,7 @@ export function InstallBanner({ debug = false }: InstallBannerProps) {
 
   return (
     <div
-      className="fixed top-4 z-50 bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg rounded-xl animate-slide-down"
+      className="fixed top-4 z-50 bg-blue-900 text-white shadow-lg rounded-xl animate-slide-down"
       style={{
         left: `calc(${sidebarWidth} + 1rem)`, // Largeur sidebar + marge
         right: "1rem", // Marge droite
@@ -220,6 +236,15 @@ export function InstallBanner({ debug = false }: InstallBannerProps) {
         <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
           DEBUG
         </div>
+      )}
+      {debug && (
+        <button
+          onClick={resetInstallBanner}
+          className="absolute -top-2 -left-2 bg-blue-500 text-white text-xs px-2 py-1 rounded-full hover:bg-blue-600"
+          title="Réinitialiser l'état d'installation"
+        >
+          RESET
+        </button>
       )}
 
       <div className="flex items-center justify-between px-4 py-3">
@@ -250,7 +275,7 @@ export function InstallBanner({ debug = false }: InstallBannerProps) {
             onClick={handleDismiss}
             size="sm"
             variant="ghost"
-            className="text-white hover:bg-blue-600 p-1 size-8"
+            className="text-white hover:bg-blue-800 hover:text-white p-1 size-8"
             aria-label="Fermer"
           >
             <X className="size-4" />

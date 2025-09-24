@@ -25,6 +25,8 @@ export const metadata: Metadata = {
     "application-name": "My Binhas",
     "msapplication-TileColor": "#000000",
     "msapplication-config": "none",
+    "apple-touch-fullscreen": "yes",
+    "format-detection": "telephone=no",
   },
 };
 
@@ -89,6 +91,29 @@ export default async function RootLayout({
             __html: THEME_COLOR_SCRIPT,
           }}
         />
+        {/* Meta tags pour PWA iOS */}
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="My Binhas" />
+        <link rel="apple-touch-icon" href="/images/icon-192-192.png" />
+        <link
+          rel="apple-touch-icon"
+          sizes="192x192"
+          href="/images/icon-192-192.png"
+        />
+        <link
+          rel="apple-touch-icon"
+          sizes="512x512"
+          href="/images/icon-512-512.png"
+        />
+
+        {/* Meta tags pour PWA Android */}
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="application-name" content="My Binhas" />
+
+        {/* Meta tags généraux */}
+        <meta name="format-detection" content="telephone=no" />
+        <meta name="theme-color" content="#1e3a8a" />
       </head>
       <body className="antialiased">
         <ThemeProvider

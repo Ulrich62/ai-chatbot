@@ -5,7 +5,11 @@
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#000000",
+  "theme_color": "#1e3a8a",
+  "scope": "/",
+  "lang": "fr",
+  "dir": "ltr",
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "/images/icon-192-192.png",
@@ -30,6 +34,12 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
+    },
+    {
+      "src": "/images/icon-96-96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any"
     }
   ],
   "orientation": "portrait-primary",
