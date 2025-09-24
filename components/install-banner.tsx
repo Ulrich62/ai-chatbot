@@ -34,9 +34,22 @@ export function InstallBanner({ debug = false }: InstallBannerProps) {
     resetInstallState,
   } = usePWAInstall();
 
+  // Détecter iOS Safari pour affichage manuel de la bannière
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+
+  // Vérifier si l'app est en mode standalone sur iOS
+  const isStandaloneIOS =
+    isIOS &&
+    (window.matchMedia("(display-mode: standalone)").matches ||
+      (window.navigator as any).standalone === true ||
+      window.matchMedia("(display-mode: fullscreen)").matches);
+
   // Déterminer si la bannière doit être visible
   const isVisible =
-    (debug || (canShowBanner && user && !loading && !isInstalled)) &&
+    (debug ||
+      (canShowBanner && user && !loading && !isInstalled) ||
+      (isIOS && isSafari && user && !loading && !isStandaloneIOS)) &&
     !isDismissed;
 
   // Vibration légère sur mobile quand la bannière apparaît (pas d'auto-dismiss)
@@ -87,12 +100,13 @@ export function InstallBanner({ debug = false }: InstallBannerProps) {
     try {
       // Pour iOS Safari, on ne peut pas déclencher l'installation automatiquement
       if (isIOS && isSafari) {
-        // Afficher les instructions pour iOS
+        // Afficher les instructions détaillées pour iOS
         alert(
-          "Pour installer My Binhas sur votre iPhone :\n\n" +
-            "1. Appuyez sur le bouton de partage (carré avec flèche vers le haut)\n" +
-            "2. Faites défiler et sélectionnez 'Ajouter à l'écran d'accueil'\n" +
-            "3. Appuyez sur 'Ajouter'",
+          "📱 Installation sur iPhone/iPad :\n\n" +
+            "1. Appuyez sur le bouton de partage (carré avec flèche vers le haut) en bas de l'écran\n" +
+            "2. Faites défiler vers le bas et sélectionnez 'Ajouter à l'écran d'accueil'\n" +
+            "3. Appuyez sur 'Ajouter' en haut à droite\n\n" +
+            "💡 L'icône My Binhas apparaîtra sur votre écran d'accueil !",
         );
         dismissBanner();
         setIsInstalling(false);

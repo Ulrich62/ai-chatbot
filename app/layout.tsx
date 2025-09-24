@@ -94,6 +94,7 @@ export default async function RootLayout({
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="My Binhas" />
+        <meta name="apple-mobile-web-app-orientations" content="portrait" />
         <link rel="apple-touch-icon" href="/images/icon-192-192.png" />
         <link
           rel="apple-touch-icon"
@@ -105,6 +106,7 @@ export default async function RootLayout({
           sizes="512x512"
           href="/images/icon-512-512.png"
         />
+        <link rel="apple-touch-startup-image" href="/images/icon-512-512.png" />
 
         {/* Meta tags pour PWA Android */}
         <meta name="mobile-web-app-capable" content="yes" />
