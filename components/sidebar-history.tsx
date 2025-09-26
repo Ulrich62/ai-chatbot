@@ -80,8 +80,8 @@ export function SidebarHistory() {
           </div>
           <SidebarGroupContent>
             <div className="flex flex-col">
-              {[44, 32, 28, 64, 52].map((item) => (
-                <Skeleton key={item} />
+              {[1, 2, 3, 4, 5].map((item) => (
+                <Skeleton key={`skeleton-${item}`} />
               ))}
             </div>
           </SidebarGroupContent>
@@ -100,7 +100,7 @@ export function SidebarHistory() {
                       <ChatItem
                         key={chat.id}
                         chat={chat}
-                        isActive={chat.id === id}
+                        isActive={chat.uuid === id}
                         setOpenMobile={setOpenMobile}
                       />
                     ))}
@@ -116,7 +116,7 @@ export function SidebarHistory() {
                       <ChatItem
                         key={chat.id}
                         chat={chat}
-                        isActive={chat.id === id}
+                        isActive={chat.uuid === id}
                         setOpenMobile={setOpenMobile}
                       />
                     ))}
@@ -132,7 +132,7 @@ export function SidebarHistory() {
                       <ChatItem
                         key={chat.id}
                         chat={chat}
-                        isActive={chat.id === id}
+                        isActive={chat.uuid === id}
                         setOpenMobile={setOpenMobile}
                       />
                     ))}
@@ -148,7 +148,7 @@ export function SidebarHistory() {
                       <ChatItem
                         key={chat.id}
                         chat={chat}
-                        isActive={chat.id === id}
+                        isActive={chat.uuid === id}
                         setOpenMobile={setOpenMobile}
                       />
                     ))}
@@ -164,7 +164,7 @@ export function SidebarHistory() {
                       <ChatItem
                         key={chat.id}
                         chat={chat}
-                        isActive={chat.id === id}
+                        isActive={chat.uuid === id}
                         setOpenMobile={setOpenMobile}
                       />
                     ))}

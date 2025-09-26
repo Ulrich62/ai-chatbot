@@ -1,29 +1,44 @@
-import type { PaginationParams, NewChatPayload, NewMessage } from '@/types';
+import type { PaginationParams, NewChatPayload, NewMessage, Message } from '@/types';
+import { buildConversationContext, buildUserInfo } from '@/lib/context-builder';
 
-const CHAT_PROXY = '/api/chat/proxy';
+const CHAT_API = '/api/chat';
+const MESSAGES_API = '/api/chat/messages';
 
 export const getChatHistory = async (params: PaginationParams) => {
   const response = await fetch(
-    `${CHAT_PROXY}?${new URLSearchParams(params as Record<string, string>)}`,
+    `${CHAT_API}?${new URLSearchParams(params as Record<string, string>)}`,
   );
   if (!response.ok)
     throw new Error("Erreur lors de la récupération de l'historique");
   return response.json();
 };
 
-export const createChat = async (newChat: NewChatPayload) => {
-  return await fetch(CHAT_PROXY, {
+export const createChat = async (newChat: NewChatPayload, userInfo: any, existingMessages: Message[] = []) => {
+  // Construire le contexte avec les messages existants et le nouveau message
+  const context = buildConversationContext(existingMessages, newChat.messages[0]);
+  const user = buildUserInfo(userInfo);
+
+  const payload = {
+    title: newChat.title,
+    messages: {
+      messages: newChat.messages,
+      context: context,
+      user_info: user
+    }
+  };
+
+  return await fetch(CHAT_API, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       Accept: 'text/event-stream',
     },
-    body: JSON.stringify(newChat),
+    body: JSON.stringify(payload),
   });
 };
 
 export const getChat = async (id: string) => {
-  const response = await fetch(`${CHAT_PROXY}?id=${id}`);
+  const response = await fetch(`${CHAT_API}?id=${id}`);
   if (!response.ok) throw new Error('Erreur lors de la récupération du chat');
   return response.json();
 };
@@ -31,14 +46,26 @@ export const getChat = async (id: string) => {
 export const sendMessage = async (payload: {
   chatId: string;
   messages: NewMessage[];
+  userInfo: any;
+  existingMessages: Message[];
 }) => {
-  return await fetch(`${CHAT_PROXY}/messages?id=${payload.chatId}`, {
+  // Construire le contexte avec les messages existants et le nouveau message
+  const context = buildConversationContext(payload.existingMessages, payload.messages[0]);
+  const user = buildUserInfo(payload.userInfo);
+
+  const requestPayload = {
+    messages: payload.messages,
+    context: context,
+    user_info: user
+  };
+
+  return await fetch(`${MESSAGES_API}?id=${payload.chatId}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       Accept: 'text/event-stream',
     },
-    body: JSON.stringify({ messages: payload.messages }),
+    body: JSON.stringify(requestPayload),
   });
 };
 
@@ -47,7 +74,7 @@ export const getChatMessages = async (
   params: PaginationParams,
 ) => {
   const response = await fetch(
-    `${CHAT_PROXY}/messages?id=${chatId}&${new URLSearchParams(params as Record<string, string>)}`,
+    `${MESSAGES_API}?id=${chatId}&${new URLSearchParams(params as Record<string, string>)}`,
   );
   if (!response.ok)
     throw new Error('Erreur lors de la récupération des messages');

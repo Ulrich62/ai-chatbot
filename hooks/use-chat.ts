@@ -5,6 +5,7 @@ import { toast } from '@/components/toast';
 import { useChatStore } from '@/store/chat-store';
 import { useMessageStore } from '@/store/message-store';
 import { useStreaming } from './use-streaming';
+import { useUserInfo } from './use-user-info';
 import { STREAM_STATUS } from '@/enums';
 import type { NewChat, Chat, PaginationParams, NewChatPayload, PaginatedResponse } from '@/types';
 
@@ -23,9 +24,18 @@ export const useChat = ({ enabled = true, search }: UseChatOptions = {}) => {
     streamStatus,
   } = useMessageStore();
   const { startStreaming } = useStreaming();
+  const { userInfo } = useUserInfo();
 
   const createChat = useCallback(
     async (newChat: NewChat) => {
+      if (!userInfo) {
+        toast({
+          type: 'error',
+          description: 'Informations utilisateur non disponibles',
+        });
+        return;
+      }
+
       try {
         clearMessages();
 
@@ -34,7 +44,7 @@ export const useChat = ({ enabled = true, search }: UseChatOptions = {}) => {
           messages: [{ content: newChat.title, is_user: true }],
         };
         await startStreaming(
-          () => createChatApi(payload),
+          () => createChatApi(payload, userInfo, []),
           newChat.title,
         );
       } catch (error) {
@@ -46,7 +56,7 @@ export const useChat = ({ enabled = true, search }: UseChatOptions = {}) => {
         });
       }
     },
-    [startStreaming, clearMessages],
+    [startStreaming, clearMessages, userInfo],
   );
 
   // Infinite chat history query

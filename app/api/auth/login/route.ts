@@ -12,12 +12,12 @@ export async function POST(req: NextRequest) {
 
     const payload = {
       email,
-      password
+      pass: password,
+      app: 'ia-assistant',
+      type: 'jwt'
     };
 
-
-
-    const apiRes = await fetch(`${process.env.NEXT_PUBLIC_RAG_API_BASE_URL}/auth/login`, {
+    const apiRes = await fetch(`https://office-test.bgds.fr/api/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
@@ -29,9 +29,9 @@ export async function POST(req: NextRequest) {
     }
 
     const data = await apiRes.json();
-    const { access_token, refresh_token } = data;
+    const { accessToken, refreshToken } = data;
 
-    if (!access_token) {
+    if (!accessToken) {
       console.error('[LOGIN] No access token received from auth service');
       return NextResponse.json({ error: 'Erreur lors de la connexion' }, { status: 500 });
     }
@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
     // Configuration des cookies
     const response = NextResponse.json({ success: true });
     
-    response.cookies.set('token', access_token, {
+    response.cookies.set('token', accessToken, {
       httpOnly: true,
       sameSite: 'lax',
       secure: process.env.NODE_ENV === 'production',
@@ -47,8 +47,8 @@ export async function POST(req: NextRequest) {
       maxAge: 60 * 60 * 24 * 7, // 7 jours
     });
 
-    if (refresh_token) {
-      response.cookies.set('refreshToken', refresh_token, {
+    if (refreshToken) {
+      response.cookies.set('refreshToken', refreshToken, {
         httpOnly: true,
         sameSite: 'lax',
         secure: process.env.NODE_ENV === 'production',
@@ -60,10 +60,7 @@ export async function POST(req: NextRequest) {
     return response;
 
   } catch (err) {
-    console.error('[LOGIN] Unexpected error:', {
-      message: err instanceof Error ? err.message : 'Unknown error',
-      stack: err instanceof Error ? err.stack : undefined
-    });
+    console.error('[LOGIN] Unexpected error:', err);
     return NextResponse.json({ error: 'Erreur interne du serveur' }, { status: 500 });
   }
 }

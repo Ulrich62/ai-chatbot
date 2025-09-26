@@ -9,30 +9,18 @@ import { useMessages } from "@/hooks/use-messages";
 import { useMemo } from "react";
 
 export default function Page() {
-  const {
-    chatMessages: messages,
-    isCreateChatPending,
-    createChat,
-    chats,
-  } = useChat();
+  const { isCreateChatPending, createChat, chats } = useChat();
 
-  // Get the most recent chat ID from the store
-  const currentChatId = chats.length > 0 ? chats[0].id : "";
+  // Sur la page d'accueil, on ne charge pas de chat existant
+  // On utilise useMessages sans chatId pour éviter de charger des messages
+  const { sendMessage } = useMessages();
 
-  const { sendMessage } = useMessages(currentChatId);
-
-  const isNewChat = useMemo(() => {
-    return !messages.length;
-  }, [messages.length]);
+  // Sur la page d'accueil, on est toujours dans un nouveau chat
+  const isNewChat = true;
+  const messages: any[] = []; // Pas de messages sur la page d'accueil
 
   const handleCreateChat = async (message: string) => {
-    if (!isNewChat) {
-      sendMessage({
-        content: message,
-        is_user: true,
-      });
-      return;
-    }
+    // Sur la page d'accueil, on crée toujours un nouveau chat
     try {
       await createChat({ title: message });
     } catch (error) {

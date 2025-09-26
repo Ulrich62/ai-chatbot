@@ -16,7 +16,7 @@ export const groupChatsByDate = (chats: Chat[]): GroupedChats => {
 
   return chats.reduce(
     (groups, chat) => {
-      const chatDate = new Date(chat.created_at);
+      const chatDate = new Date(chat.created || chat.created_at || new Date());
 
       if (isToday(chatDate)) {
         groups.today.push(chat);

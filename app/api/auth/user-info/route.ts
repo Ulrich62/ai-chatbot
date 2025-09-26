@@ -18,8 +18,8 @@ export async function GET(req: NextRequest) {
     });
 
     if (!apiRes.ok) {
-      console.warn(`[AUTH] Échec de récupération des infos utilisateur: ${apiRes.status} ${apiRes.statusText}`);
-      return NextResponse.json({ error: 'Token invalide ou expiré' }, { status: 401 });
+      console.warn(`[USER_INFO] Échec de récupération des infos utilisateur: ${apiRes.status} ${apiRes.statusText}`);
+      return NextResponse.json({ error: 'Erreur lors de la récupération des informations utilisateur' }, { status: 401 });
     }
 
     const userData = await apiRes.json();
@@ -40,7 +40,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ user });
 
   } catch (err) {
-    console.error('[AUTH] Erreur inattendue:', err);
+    console.error('[USER_INFO] Erreur inattendue:', err);
     return NextResponse.json({ error: 'Erreur interne du serveur' }, { status: 500 });
   }
-} 
+}

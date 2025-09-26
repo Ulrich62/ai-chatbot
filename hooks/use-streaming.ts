@@ -49,7 +49,8 @@ export const useStreaming = () => {
       const callbacks: StreamingCallbacks = {
         onChatCreated: (data) => {
           const newChat: Chat = {
-            id: data.chat_id,
+            id: data.chat_id, // L'UUID est maintenant utilisé comme ID
+            uuid: data.chat_id,
             title: data.title,
             created_at: data.created_at,
           };

@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
 
 
     // Appel à l'API externe avec le refresh token comme Bearer
-    const apiRes = await fetch(`${process.env.NEXT_PUBLIC_RAG_API_BASE_URL}/auth/refresh`, {
+    const apiRes = await fetch(`https://office-test.bgds.fr/api/refreshToken`, {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',

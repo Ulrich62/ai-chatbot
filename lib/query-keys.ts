@@ -38,7 +38,7 @@ export const queries = createQueryKeyStore({
       params: NewChat;
     }) => ({
       queryKey: ['chat', 'create', params, data] as const,
-      mutationFn: (newChat: NewChatPayload) => createChat(newChat),
+      mutationFn: (newChat: NewChatPayload) => createChat(newChat, {}, []),
     }),
     history: ({
       params,
@@ -59,7 +59,7 @@ export const queries = createQueryKeyStore({
       message,
     }: { chatId: string; message: NewMessage }) => ({
       queryKey: ['chat', 'sendMessage', chatId, message],
-      mutationFn: (message: NewMessage) => sendMessage({ chatId, messages: [message] }),
+      mutationFn: (message: NewMessage) => sendMessage({ chatId, messages: [message], userInfo: {}, existingMessages: [] }),
     }),
 
     messages: ({

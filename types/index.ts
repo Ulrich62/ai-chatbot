@@ -7,6 +7,10 @@ export interface User {
   fname: string;
   name: string;
   email?: string;
+  id?: number;
+  role?: any;
+  specialities?: any[];
+  companies?: any[];
 }
 
 export interface AuthTokens {
@@ -28,8 +32,10 @@ export interface LoginResponse {
 // ===== CHAT TYPES =====
 export interface Message {
   id: string;
+  uuid?: string;
   content: string;
   is_user: boolean;
+  created?: string;
   created_at?: string;
   isLoading?: boolean;
   isStreaming?: boolean;
@@ -43,9 +49,11 @@ export interface NewMessage {
 
 export interface Chat {
   id: string;
+  uuid?: string;
   title: string;
   messages?: Message[];
-  created_at: string;
+  created?: string;
+  created_at?: string;
 }
 
 export interface NewChat {
@@ -60,6 +68,47 @@ export interface NewChatPayload {
 export interface ChatMessagePayload {
   chatId: string;
   messages: NewMessage[];
+  userInfo: any;
+  existingMessages: Message[];
+}
+
+// ===== NEW API TYPES =====
+export interface ConversationContext {
+  conversation_history: Array<{
+    content: string;
+    is_user: boolean;
+    timestamp: string;
+    uuid?: string;
+  }>;
+  total_messages: number;
+  context_length: number;
+}
+
+export interface UserInfo {
+  uuid: string;
+  email: string;
+  name: string;
+  fname: string;
+  label: string;
+  id: number;
+  role: any;
+  specialities: any[];
+  companies: any[];
+}
+
+export interface NewChatRequest {
+  title: string;
+  messages: {
+    messages: NewMessage[];
+    context: string; // JSON string
+    user_info: UserInfo;
+  };
+}
+
+export interface NewMessageRequest {
+  messages: NewMessage[];
+  context: string; // JSON string
+  user_info: UserInfo;
 }
 
 // ===== STREAMING TYPES =====

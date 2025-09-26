@@ -6,6 +6,7 @@ import { useMessageStore } from "@/store/message-store";
 import { useStreaming } from "./use-streaming";
 import { STREAM_STATUS } from "@/enums";
 import { sendMessage as sendMessageApi } from "@/apis/chat-api";
+import { useUserInfo } from "./use-user-info";
 import type { Message, NewMessage } from "@/types";
 
 export const useMessages = (chatId?: string) => {
@@ -16,6 +17,7 @@ export const useMessages = (chatId?: string) => {
     currentStreamingMessageId,
   } = useMessageStore();
   const { startStreaming } = useStreaming();
+  const { userInfo } = useUserInfo();
 
   const { isLoading: isMessagesLoading, data: messages } = useQuery<Message[]>({
     ...queries.chat.messages({ chatId: chatId as string }),
@@ -30,12 +32,14 @@ export const useMessages = (chatId?: string) => {
   });
 
   const sendMessage = async (message: NewMessage) => {
-    if (!chatId) return;
+    if (!chatId || !userInfo) return;
 
     try {
       const payload = {
         chatId,
         messages: [message],
+        userInfo,
+        existingMessages: allMessages,
       };
       await startStreaming(
         () => sendMessageApi(payload),
@@ -51,7 +55,27 @@ export const useMessages = (chatId?: string) => {
   };
 
   const allMessages = useMemo(() => {
-    return [...(messages ?? []), ...chatMessages];
+    // D'abord, trier les messages de l'API (qui sont dans l'ordre décroissant)
+    const sortedApiMessages = [...(messages ?? [])].sort((a, b) => {
+      const dateA = new Date(a.created || a.created_at || 0);
+      const dateB = new Date(b.created || b.created_at || 0);
+      return dateA.getTime() - dateB.getTime(); // Ordre croissant (plus ancien en premier)
+    });
+
+    // Ensuite, trier les messages du store
+    const sortedStoreMessages = [...chatMessages].sort((a, b) => {
+      const dateA = new Date(a.created || a.created_at || 0);
+      const dateB = new Date(b.created || b.created_at || 0);
+      return dateA.getTime() - dateB.getTime(); // Ordre croissant (plus ancien en premier)
+    });
+
+    // Combiner et trier à nouveau pour s'assurer de l'ordre correct
+    const combined = [...sortedApiMessages, ...sortedStoreMessages];
+    return combined.sort((a, b) => {
+      const dateA = new Date(a.created || a.created_at || 0);
+      const dateB = new Date(b.created || b.created_at || 0);
+      return dateA.getTime() - dateB.getTime();
+    });
   }, [chatMessages, messages]);
 
   return {

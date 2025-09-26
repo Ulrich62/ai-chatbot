@@ -51,6 +51,12 @@ export const useChatStore = create<ChatState & ChatActions>()(
       addChatsToEnd: (chats) =>
         set((state) => {
           state.chats.push(...chats); // Add to end for pagination
+          // Trier par date de création (plus récent en premier)
+          state.chats.sort((a, b) => {
+            const dateA = new Date(a.created || a.created_at || 0);
+            const dateB = new Date(b.created || b.created_at || 0);
+            return dateB.getTime() - dateA.getTime();
+          });
         }),
 
       updateChat: (id, updates) =>
