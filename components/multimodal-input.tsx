@@ -2,7 +2,7 @@
 
 import cx from "classnames";
 import type React from "react";
-import { useRef, useEffect, useState, memo, useCallback } from "react";
+import { useRef, useEffect, useState, memo, useCallback, useMemo } from "react";
 import { useWindowSize } from "usehooks-ts";
 
 import { ArrowUpIcon, StopIcon } from "./icons";

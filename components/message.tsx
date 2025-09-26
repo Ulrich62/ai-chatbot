@@ -8,6 +8,7 @@ import equal from "fast-deep-equal";
 import { cn, sanitizeText } from "@/lib/utils";
 import { ROLES, STREAM_STATUS } from "@/enums";
 import { BotIcon } from "./icons/BotIcon";
+import type { Message } from "@/types";
 
 type PurePreviewMessageProps = {
   message: Message;
@@ -46,7 +47,7 @@ const PurePreviewMessage = ({
               "flex gap-4 group-data-[role=user]/message:px-3 w-full group-data-[role=user]/message:w-fit group-data-[role=user]/message:ml-auto group-data-[role=user]/message:max-w-2xl group-data-[role=user]/message:py-2 rounded-xl",
               {
                 "group-data-[role=user]/message:bg-muted": true,
-              }
+              },
             )}
           >
             <AssistantAvatar />
@@ -92,7 +93,7 @@ const PurePreviewMessage = ({
               "flex gap-4 w-full group-data-[role=user]/message:ml-auto group-data-[role=user]/message:max-w-[70%]",
               {
                 "group-data-[role=user]/message:w-fit": true,
-              }
+              },
             )}
           >
             {role === ROLES.ASSISTANT && <AssistantAvatar />}
@@ -112,7 +113,7 @@ const PurePreviewMessage = ({
                         message.is_user,
                       "animate-fadeInUp": isTransitioning,
                       "opacity-100": !isTransitioning,
-                    }
+                    },
                   )}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{
@@ -147,7 +148,7 @@ export const PreviewMessage = memo(
       return false;
 
     return true;
-  }
+  },
 );
 
 const AssistantAvatar = () => {

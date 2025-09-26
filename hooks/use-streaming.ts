@@ -4,6 +4,7 @@ import { useChatStore } from '@/store/chat-store';
 import { TEMP_MSG_ID_PREFIX } from '@/constants';
 import { STREAM_STATUS } from '@/enums';
 import { processSSEStream } from '@/lib/processSSEStream';
+import type { Message, StreamingCallbacks, Chat } from '@/types';
 
 export const useStreaming = () => {
   const {

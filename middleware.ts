@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { isTokenExpired } from '@/utils/jwt-decoder';
+import { logger } from '@/lib/logger';
 
 export async function middleware(req: NextRequest) {
   const pathname = req.nextUrl.pathname;
@@ -46,11 +47,11 @@ export async function middleware(req: NextRequest) {
         
         return response;
       } else {
-        console.warn('[MIDDLEWARE] Échec du refresh, redirection vers login');
+        logger.warn('Token refresh failed, redirecting to login', { pathname });
         return NextResponse.redirect(new URL('/login', req.url));
       }
     } catch (error) {
-      console.error('[MIDDLEWARE] Erreur lors du refresh:', error);
+      logger.error('Error during token refresh', { pathname }, error as Error);
       return NextResponse.redirect(new URL('/login', req.url));
     }
   }
@@ -80,11 +81,11 @@ export async function middleware(req: NextRequest) {
           
           return response;
         } else {
-          console.warn('[MIDDLEWARE] Échec du refresh du token expiré, redirection vers login');
+          logger.warn('Expired token refresh failed, redirecting to login', { pathname });
           return NextResponse.redirect(new URL('/login', req.url));
         }
       } catch (error) {
-        console.error('[MIDDLEWARE] Erreur lors du refresh du token expiré:', error);
+        logger.error('Error during expired token refresh', { pathname }, error as Error);
         return NextResponse.redirect(new URL('/login', req.url));
       }
     }

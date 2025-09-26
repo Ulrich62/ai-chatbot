@@ -1,3 +1,5 @@
+import type { User } from '@/types';
+
 const secureStore = window.localStorage || window.sessionStorage;
 
 enum storeKeys {

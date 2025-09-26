@@ -1,13 +1,16 @@
 import { create } from 'zustand';
+import { subscribeWithSelector } from 'zustand/middleware';
+import { immer } from 'zustand/middleware/immer';
 import { STREAM_STATUS } from '@/enums';
+import type { Message } from '@/types';
 
-type MessageState = {
+interface MessageState {
   messages: Message[];
   streamStatus: STREAM_STATUS;
   currentStreamingMessageId: string | null;
-};
+}
 
-type MessageActions = {
+interface MessageActions {
   addMessages: (msgList: Message[]) => void;
   updateMessage: (id: string, updates: Partial<Message>) => void;
   updateStreamingMessage: (id: string, content: string) => void;
@@ -17,68 +20,90 @@ type MessageActions = {
   setStreamStatus: (status: STREAM_STATUS) => void;
   setCurrentStreamingMessageId: (id: string | null) => void;
   completeStreamingMessage: (id: string, finalContent: string) => void;
+}
+
+// Selectors for optimized re-renders
+export const messageSelectors = {
+  messages: (state: MessageState) => state.messages,
+  streamStatus: (state: MessageState) => state.streamStatus,
+  currentStreamingMessageId: (state: MessageState) => state.currentStreamingMessageId,
+  lastMessage: (state: MessageState) => state.messages[state.messages.length - 1],
+  userMessages: (state: MessageState) => state.messages.filter(msg => msg.is_user),
+  botMessages: (state: MessageState) => state.messages.filter(msg => !msg.is_user),
+  isLoading: (state: MessageState) => state.streamStatus === STREAM_STATUS.STREAMING || state.streamStatus === STREAM_STATUS.STARTING,
+  hasMessages: (state: MessageState) => state.messages.length > 0,
 };
 
-export const useMessageStore = create<MessageState & MessageActions>((set) => ({
-  messages: [],
-  streamStatus: STREAM_STATUS.IDLE,
-  currentStreamingMessageId: null,
-
-  addMessages: (msgList) =>
-    set((state) => ({
-      messages: [...state.messages, ...msgList],
-    })),
-
-  updateMessage: (id, updates) =>
-    set((state) => ({
-      messages: state.messages.map((msg) =>
-        msg.id === id ? { ...msg, ...updates } : msg,
-      ),
-    })),
-
-  updateStreamingMessage: (id, content) =>
-    set((state) => ({
-      messages: state.messages.map((msg) =>
-        msg.id === id
-          ? { ...msg, content, isLoading: false }
-          : msg,
-      ),
-    })),
-
-  replaceMessageId: (oldId, newId) =>
-    set((state) => ({
-      messages: state.messages.map((msg) =>
-        msg.id === oldId ? { ...msg, id: newId } : msg,
-      ),
-    })),
-
-  clearMessages: () =>
-    set({
+export const useMessageStore = create<MessageState & MessageActions>()(
+  subscribeWithSelector(
+    immer((set) => ({
       messages: [],
       streamStatus: STREAM_STATUS.IDLE,
       currentStreamingMessageId: null,
-    }),
 
-  setMessages: (messages: Message[]) => set({ messages }),
+      addMessages: (msgList) =>
+        set((state) => {
+          state.messages.push(...msgList);
+        }),
 
-  setStreamStatus: (status: STREAM_STATUS) => set({ streamStatus: status }),
+      updateMessage: (id, updates) =>
+        set((state) => {
+          const messageIndex = state.messages.findIndex((msg) => msg.id === id);
+          if (messageIndex !== -1) {
+            Object.assign(state.messages[messageIndex], updates);
+          }
+        }),
 
-  setCurrentStreamingMessageId: (id: string | null) =>
-    set({ currentStreamingMessageId: id }),
+      updateStreamingMessage: (id, content) =>
+        set((state) => {
+          const messageIndex = state.messages.findIndex((msg) => msg.id === id);
+          if (messageIndex !== -1) {
+            state.messages[messageIndex].content = content;
+            state.messages[messageIndex].isLoading = false;
+          }
+        }),
 
-  completeStreamingMessage: (id, finalContent) =>
-    set((state) => ({
-      messages: state.messages.map((msg) =>
-        msg.id === id
-          ? {
-              ...msg,
-              content: finalContent,
-              isStreaming: false,
-              isComplete: true,
-            }
-          : msg,
-      ),
-      streamStatus: STREAM_STATUS.COMPLETED,
-      currentStreamingMessageId: null,
-    })),
-}));
+      replaceMessageId: (oldId, newId) =>
+        set((state) => {
+          const messageIndex = state.messages.findIndex((msg) => msg.id === oldId);
+          if (messageIndex !== -1) {
+            state.messages[messageIndex].id = newId;
+          }
+        }),
+
+      clearMessages: () =>
+        set((state) => {
+          state.messages = [];
+          state.streamStatus = STREAM_STATUS.IDLE;
+          state.currentStreamingMessageId = null;
+        }),
+
+      setMessages: (messages) =>
+        set((state) => {
+          state.messages = messages;
+        }),
+
+      setStreamStatus: (status) =>
+        set((state) => {
+          state.streamStatus = status;
+        }),
+
+      setCurrentStreamingMessageId: (id) =>
+        set((state) => {
+          state.currentStreamingMessageId = id;
+        }),
+
+      completeStreamingMessage: (id, finalContent) =>
+        set((state) => {
+          const messageIndex = state.messages.findIndex((msg) => msg.id === id);
+          if (messageIndex !== -1) {
+            state.messages[messageIndex].content = finalContent;
+            state.messages[messageIndex].isStreaming = false;
+            state.messages[messageIndex].isComplete = true;
+          }
+          state.streamStatus = STREAM_STATUS.COMPLETED;
+          state.currentStreamingMessageId = null;
+        }),
+    }))
+  )
+);

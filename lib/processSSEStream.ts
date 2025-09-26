@@ -1,3 +1,5 @@
+import type { StreamingCallbacks } from '@/types';
+
 export async function processSSEStream(
   body: ReadableStream<Uint8Array>,
   callbacks: StreamingCallbacks,

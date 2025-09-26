@@ -3,6 +3,7 @@ import { SidebarMenuButton, SidebarMenuItem } from "./ui/sidebar";
 import Link from "next/link";
 import { memo } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import type { Chat } from "@/types";
 
 type ChatProps = {
   chat: Chat;

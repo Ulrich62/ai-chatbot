@@ -1,4 +1,5 @@
 import { isToday, isYesterday, subMonths, subWeeks } from 'date-fns';
+import type { Chat } from '@/types';
 
 type GroupedChats = {
   today: Chat[];

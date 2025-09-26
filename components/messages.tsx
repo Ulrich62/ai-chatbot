@@ -1,12 +1,13 @@
 import { PreviewMessage } from "./message";
 import { Greeting } from "./greeting";
-import { memo, useEffect, useRef, useMemo } from "react";
+import { memo, useEffect, useRef, useMemo, Suspense } from "react";
 import { motion } from "framer-motion";
 import { useScrollToView } from "@/hooks/use-scroll-to-view";
-import type { MESSAGE_STATUS, STREAM_STATUS } from "@/enums";
+import { MESSAGE_STATUS, STREAM_STATUS } from "@/enums";
+import type { Message } from "@/types";
 
 interface MessagesProps {
-  messages: Array<Message>;
+  messages: Message[];
   loading?: boolean;
   status?: MESSAGE_STATUS;
   streamStatus?: STREAM_STATUS;
@@ -20,8 +21,7 @@ function PureMessages({ messages, loading, streamStatus }: MessagesProps) {
   const { hasMessages } = useMemo(() => {
     const hasMessages = messages.length > 0;
     const lastMessage = messages[messages.length - 1];
-    const shouldShowThinkingMessage =
-      lastMessage?.isLoading;
+    const shouldShowThinkingMessage = lastMessage?.isLoading;
 
     return {
       hasMessages,

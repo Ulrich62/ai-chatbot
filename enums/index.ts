@@ -3,18 +3,5 @@ export enum ROLES {
   ASSISTANT = 'assistant',
 }
 
-export enum MESSAGE_STATUS {
-  READY = 'ready',
-  SUBMITTED = 'submitted',
-  STREAMING = 'streaming',
-  ERROR = 'error',
-}
-
-export enum STREAM_STATUS {
-  IDLE = 'idle',
-  STARTING = 'starting',
-  STREAMING = 'streaming',
-  TRANSITIONING = 'transitioning',
-  COMPLETED = 'completed',
-  ERROR = 'error',
-}
+// Re-export enums from types for backward compatibility
+export { MESSAGE_STATUS, STREAM_STATUS } from '@/types';

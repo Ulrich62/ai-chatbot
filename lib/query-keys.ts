@@ -7,6 +7,7 @@ import {
 } from '@/apis/chat-api';
 import { DEFAULT_PAGE_SIZE } from '@/constants/global';
 import { createQueryKeyStore } from '@lukemorales/query-key-factory';
+import type { PaginationParams, PaginatedResponse, NewChat, NewChatPayload, NewMessage } from '@/types';
 
 interface BasePaginationParams {
   page?: number;
@@ -14,8 +15,8 @@ interface BasePaginationParams {
   search?: string;
 }
 
-const createPaginatedQueryFn = <T, P extends BasePaginationParams>(
-  fetcher: (params: P) => Promise<PaginateList<T>>,
+const createPaginatedQueryFn = <T, P extends PaginationParams>(
+  fetcher: (params: P) => Promise<PaginatedResponse<T>>,
   params?: P,
 ) => {
   return ({ pageParam = 1 }: { pageParam: number }) => {

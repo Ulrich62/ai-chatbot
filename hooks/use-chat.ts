@@ -6,6 +6,7 @@ import { useChatStore } from '@/store/chat-store';
 import { useMessageStore } from '@/store/message-store';
 import { useStreaming } from './use-streaming';
 import { STREAM_STATUS } from '@/enums';
+import type { NewChat, Chat, PaginationParams, NewChatPayload, PaginatedResponse } from '@/types';
 
 const DEFAULT_PAGE_SIZE = 20;
 
@@ -69,7 +70,7 @@ export const useChat = ({ enabled = true, search }: UseChatOptions = {}) => {
         limit: pageSize,
       });
     },
-    getNextPageParam: (lastPage: PaginateList<Chat>) => {
+    getNextPageParam: (lastPage: PaginatedResponse<Chat>) => {
       if (lastPage.page < lastPage.pages) {
         return lastPage.page + 1;
       }

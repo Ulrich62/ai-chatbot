@@ -6,6 +6,7 @@ import { useMessageStore } from "@/store/message-store";
 import { useStreaming } from "./use-streaming";
 import { STREAM_STATUS } from "@/enums";
 import { sendMessage as sendMessageApi } from "@/apis/chat-api";
+import type { Message, NewMessage } from "@/types";
 
 export const useMessages = (chatId?: string) => {
   const {

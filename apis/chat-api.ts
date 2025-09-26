@@ -1,8 +1,10 @@
+import type { PaginationParams, NewChatPayload, NewMessage } from '@/types';
+
 const CHAT_PROXY = '/api/chat/proxy';
 
-export const getChatHistory = async (params: BasePaginationParams) => {
+export const getChatHistory = async (params: PaginationParams) => {
   const response = await fetch(
-    `${CHAT_PROXY}?${new URLSearchParams(params as any)}`,
+    `${CHAT_PROXY}?${new URLSearchParams(params as Record<string, string>)}`,
   );
   if (!response.ok)
     throw new Error("Erreur lors de la récupération de l'historique");
@@ -42,10 +44,10 @@ export const sendMessage = async (payload: {
 
 export const getChatMessages = async (
   chatId: string,
-  params: BasePaginationParams,
+  params: PaginationParams,
 ) => {
   const response = await fetch(
-    `${CHAT_PROXY}/messages?id=${chatId}&${new URLSearchParams(params as any)}`,
+    `${CHAT_PROXY}/messages?id=${chatId}&${new URLSearchParams(params as Record<string, string>)}`,
   );
   if (!response.ok)
     throw new Error('Erreur lors de la récupération des messages');
