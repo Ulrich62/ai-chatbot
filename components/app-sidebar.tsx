@@ -35,6 +35,9 @@ export function AppSidebar() {
 
   const handleLogoClick = () => {
     setOpenMobile(false);
+    clearMessages();
+    router.push("/");
+    router.refresh();
   };
 
   return (

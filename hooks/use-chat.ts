@@ -6,6 +6,7 @@ import { useChatStore } from '@/store/chat-store';
 import { useMessageStore } from '@/store/message-store';
 import { useStreaming } from './use-streaming';
 import { useUserInfo } from './use-user-info';
+import { useApi } from './use-api';
 import { STREAM_STATUS } from '@/enums';
 import type { NewChat, Chat, PaginationParams, NewChatPayload, PaginatedResponse } from '@/types';
 
@@ -25,6 +26,7 @@ export const useChat = ({ enabled = true, search }: UseChatOptions = {}) => {
   } = useMessageStore();
   const { startStreaming } = useStreaming();
   const { userInfo } = useUserInfo();
+  const { get } = useApi();
 
   const createChat = useCallback(
     async (newChat: NewChat) => {
@@ -71,14 +73,21 @@ export const useChat = ({ enabled = true, search }: UseChatOptions = {}) => {
     error,
   } = useInfiniteQuery({
     queryKey: ['chat', 'history', { search }],
-    queryFn: ({ pageParam = 1 }: { pageParam: number }) => {
+    queryFn: async ({ pageParam = 1 }: { pageParam: number }) => {
       const pageSize = DEFAULT_PAGE_SIZE;
-
-      return getChatHistory({
-        search,
-        page: pageParam,
-        limit: pageSize,
+      const params = new URLSearchParams({
+        page: pageParam.toString(),
+        limit: pageSize.toString(),
+        ...(search && { search }),
       });
+
+      const response = await get<PaginatedResponse<Chat>>(`/api/chat?${params}`);
+      
+      if (!response.success) {
+        throw new Error(response.error || 'Erreur lors de la récupération de l\'historique');
+      }
+      
+      return response.data!;
     },
     getNextPageParam: (lastPage: PaginatedResponse<Chat>) => {
       if (lastPage.page < lastPage.pages) {

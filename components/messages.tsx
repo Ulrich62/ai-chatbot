@@ -2,7 +2,7 @@ import { PreviewMessage } from "./message";
 import { Greeting } from "./greeting";
 import { memo, useEffect, useRef, useMemo, Suspense } from "react";
 import { motion } from "framer-motion";
-import { useScrollToView } from "@/hooks/use-scroll-to-view";
+import { useScrollContext } from "@/contexts/scroll-context";
 import { MESSAGE_STATUS, STREAM_STATUS } from "@/enums";
 import type { Message } from "@/types";
 
@@ -14,7 +14,14 @@ interface MessagesProps {
 }
 
 function PureMessages({ messages, loading, streamStatus }: MessagesProps) {
-  const { elementRef: latestMessageRef, scrollToView } = useScrollToView();
+  const { 
+    containerRef, 
+    endRef, 
+    isAtBottom, 
+    scrollToBottom, 
+    onViewportEnter, 
+    onViewportLeave 
+  } = useScrollContext();
   const previousMessagesLengthRef = useRef(0);
 
   // Memoize expensive calculations
@@ -36,7 +43,6 @@ function PureMessages({ messages, loading, streamStatus }: MessagesProps) {
         <div
           key={`${message.id}-${index}`}
           className="scroll-mt-4"
-          ref={index === messages.length - 1 ? latestMessageRef : undefined}
         >
           <PreviewMessage
             message={message}
@@ -47,7 +53,7 @@ function PureMessages({ messages, loading, streamStatus }: MessagesProps) {
         </div>
       );
     });
-  }, [messages, hasMessages, latestMessageRef, streamStatus]);
+  }, [messages, hasMessages, streamStatus]);
 
   // Smooth scroll only when a new user message is added
   useEffect(() => {
@@ -55,22 +61,27 @@ function PureMessages({ messages, loading, streamStatus }: MessagesProps) {
 
     if (isNewMessage) {
       const last = messages[messages.length - 1];
-      scrollToView({
-        behavior: last?.isLoading ? "smooth" : "instant",
-        block: "start",
-      });
+      scrollToBottom(last?.isLoading ? "smooth" : "instant");
     }
 
     previousMessagesLengthRef.current = messages.length;
-  }, [messages, scrollToView]);
+  }, [messages, scrollToBottom]);
 
   return (
-    <div className="flex flex-col flex-1 gap-6 min-w-0 overflow-y-scroll pt-4 relative">
+    <div 
+      ref={containerRef}
+      className="flex flex-col flex-1 gap-6 min-w-0 overflow-y-scroll pt-4 relative"
+    >
       {!hasMessages && !loading && <Greeting />}
 
       {renderedMessages}
 
-      <motion.div className="shrink-0 min-w-[24px] min-h-[24px]" />
+      <motion.div 
+        ref={endRef}
+        className="shrink-0 min-w-[24px] min-h-[24px]"
+        onViewportEnter={onViewportEnter}
+        onViewportLeave={onViewportLeave}
+      />
     </div>
   );
 }

@@ -10,7 +10,7 @@ import { Button } from "./ui/button";
 import { Textarea } from "./ui/textarea";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowDown } from "lucide-react";
-import { useScrollToBottom } from "@/hooks/use-scroll-to-bottom";
+import { useScrollContext } from "@/contexts/scroll-context";
 import {
   ANIMATION_CONFIG,
   AUTO_HEIGHT,
@@ -35,7 +35,7 @@ function PureMultimodalInput({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { width } = useWindowSize();
   const [input, setInput] = useState("");
-  const { isAtBottom, scrollToBottom } = useScrollToBottom();
+  const { isAtBottom, scrollToBottom } = useScrollContext();
 
   // Memoize height adjustment functions
   const adjustHeight = useCallback(() => {
@@ -186,7 +186,8 @@ function PureStopButton({ stop }: StopButtonProps) {
   return (
     <Button
       data-testid="stop-button"
-      className="rounded-full p-1.5 h-fit border dark:border-zinc-600"
+      variant="outline"
+      className="rounded-full p-1.5 h-fit bg-white dark:bg-gray-800 border-gray-300 dark:border-zinc-600 hover:bg-gray-50 dark:hover:bg-gray-700"
       onClick={handleClick}
     >
       <StopIcon size={14} />

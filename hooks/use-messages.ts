@@ -7,6 +7,7 @@ import { useStreaming } from "./use-streaming";
 import { STREAM_STATUS } from "@/enums";
 import { sendMessage as sendMessageApi } from "@/apis/chat-api";
 import { useUserInfo } from "./use-user-info";
+import { useApi } from "./use-api";
 import type { Message, NewMessage } from "@/types";
 
 export const useMessages = (chatId?: string) => {
@@ -18,9 +19,21 @@ export const useMessages = (chatId?: string) => {
   } = useMessageStore();
   const { startStreaming } = useStreaming();
   const { userInfo } = useUserInfo();
+  const { get } = useApi();
 
   const { isLoading: isMessagesLoading, data: messages } = useQuery<Message[]>({
-    ...queries.chat.messages({ chatId: chatId as string }),
+    queryKey: ['chat', 'messages', chatId],
+    queryFn: async () => {
+      if (!chatId) return [];
+      
+      const response = await get<Message[]>(`/api/chat/messages?id=${chatId}&page=1&limit=10`);
+      
+      if (!response.success) {
+        throw new Error(response.error || 'Erreur lors de la récupération des messages');
+      }
+      
+      return response.data || [];
+    },
     enabled: !!chatId,
     select: (data: Message[]) => {
       const decodedMessages = data.map((message: Message) => ({

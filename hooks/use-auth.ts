@@ -1,4 +1,5 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useCallback } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { authService } from '@/lib/auth';
 import type { User, LoginRequest } from '@/types';
 
@@ -14,9 +15,20 @@ interface UseAuthReturn {
 }
 
 export function useAuth(): UseAuthReturn {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data: user, isLoading: loading, error, refetch } = useQuery({
+    queryKey: ['auth', 'user'],
+    queryFn: async (): Promise<User | null> => {
+      return await authService.getCurrentUser();
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
+    retry: 1,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+    refetchInterval: false,
+    refetchIntervalInBackground: false,
+  });
 
   const refreshAuth = useCallback(async (): Promise<boolean> => {
     try {
@@ -27,69 +39,38 @@ export function useAuth(): UseAuthReturn {
     }
   }, []);
 
-  const fetchUser = useCallback(async (): Promise<void> => {
-    try {
-      setError(null);
-      const userData = await authService.getCurrentUser();
-      setUser(userData);
-    } catch (error) {
-      console.error('[USE_AUTH] Fetch user error:', error);
-      setUser(null);
-      setError('Erreur de connexion');
-    }
-  }, []);
-
-  useEffect(() => {
-    setLoading(true);
-    fetchUser().finally(() => setLoading(false));
-  }, [fetchUser]);
-
   const login = useCallback(async (credentials: LoginRequest) => {
-    setLoading(true);
-    setError(null);
-    
     try {
       const result = await authService.login(credentials);
       
       if (result.success) {
-        setUser(result.user || null);
+        // Invalider le cache pour forcer un refetch
+        refetch();
         return { success: true };
       } else {
-        setError(result.error || 'Erreur de connexion');
         return { success: false, error: result.error };
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Erreur de connexion';
-      setError(errorMessage);
       return { success: false, error: errorMessage };
-    } finally {
-      setLoading(false);
     }
-  }, []);
+  }, [refetch]);
 
   const logout = useCallback(async () => {
-    setLoading(true);
     try {
       await authService.logout();
-      setUser(null);
-      setError(null);
+      // Invalider le cache pour forcer un refetch
+      refetch();
       window.location.href = '/login';
     } catch (error) {
       console.error('[USE_AUTH] Logout error:', error);
-    } finally {
-      setLoading(false);
     }
-  }, []);
-
-  const refetch = useCallback(() => {
-    setLoading(true);
-    fetchUser().finally(() => setLoading(false));
-  }, [fetchUser]);
+  }, [refetch]);
 
   return {
-    user,
+    user: user || null,
     loading,
-    error,
+    error: error?.message || null,
     login,
     logout,
     refreshAuth,
