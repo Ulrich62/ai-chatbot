@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { isTokenExpired } from '@/utils/jwt-decoder';
 
-const RAG_API_BASE = 'https://dev-api-731964001502.europe-west9.run.app/api/v1';
+const RAG_API_BASE = process.env.NEXT_PUBLIC_RAG_API_BASE_URL;
 
 async function refreshTokenIfNeeded(req: NextRequest): Promise<string | null> {
   const token = req.cookies.get('token')?.value;

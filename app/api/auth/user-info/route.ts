@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Appel à l'API externe pour récupérer les infos utilisateur
-    const apiRes = await fetch(`https://office-test.bgds.fr/api/getUserInfos`, {
+    const apiRes = await fetch(`${process.env.NEXT_PUBLIC_AUTH_API_BASE_URL}/getUserInfos`, {
       method: 'GET',
       headers: { 
         'Content-Type': 'application/json',
