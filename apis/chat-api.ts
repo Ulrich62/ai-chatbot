@@ -5,9 +5,21 @@ const CHAT_API = '/api/chat';
 const MESSAGES_API = '/api/chat/messages';
 
 export const getChatHistory = async (params: PaginationParams) => {
-  const response = await fetch(
-    `${CHAT_API}?${new URLSearchParams(params as Record<string, string>)}`,
-  );
+  const searchParams = new URLSearchParams();
+  
+  if (params.limit) {
+    searchParams.set('limit', params.limit.toString());
+  }
+  
+  if (params.start_id) {
+    searchParams.set('start_id', params.start_id.toString());
+  }
+  
+  if (params.search) {
+    searchParams.set('search', params.search);
+  }
+
+  const response = await fetch(`${CHAT_API}?${searchParams}`);
   if (!response.ok)
     throw new Error("Erreur lors de la récupération de l'historique");
   return response.json();
@@ -73,9 +85,18 @@ export const getChatMessages = async (
   chatId: string,
   params: PaginationParams,
 ) => {
-  const response = await fetch(
-    `${MESSAGES_API}?id=${chatId}&${new URLSearchParams(params as Record<string, string>)}`,
-  );
+  const searchParams = new URLSearchParams();
+  searchParams.set('id', chatId);
+  
+  if (params.limit) {
+    searchParams.set('limit', params.limit.toString());
+  }
+  
+  if (params.start_id) {
+    searchParams.set('start_id', params.start_id.toString());
+  }
+
+  const response = await fetch(`${MESSAGES_API}?${searchParams}`);
   if (!response.ok)
     throw new Error('Erreur lors de la récupération des messages');
   return response.json();

@@ -44,7 +44,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Token manquant' }, { status: 401 });
     }
 
-    // Récupérer l'ID du chat depuis les query params
+    // Récupérer l'ID du chat et les paramètres de pagination depuis les query params
     const url = new URL(req.url);
     const chatId = url.searchParams.get('id');
     
@@ -52,7 +52,17 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'ID du chat manquant' }, { status: 400 });
     }
 
-    const targetUrl = `${RAG_API_BASE}/messages/chat/${chatId}`;
+    // Construire l'URL avec les paramètres de pagination
+    const searchParams = new URLSearchParams();
+    if (url.searchParams.get('limit')) {
+      searchParams.set('limit', url.searchParams.get('limit')!);
+    }
+    if (url.searchParams.get('start_id')) {
+      searchParams.set('start_id', url.searchParams.get('start_id')!);
+    }
+    
+    const queryString = searchParams.toString();
+    const targetUrl = `${RAG_API_BASE}/messages/chat/${chatId}${queryString ? `?${queryString}` : ''}`;
 
     const response = await fetch(targetUrl, {
       method: 'GET',

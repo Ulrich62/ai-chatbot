@@ -26,7 +26,7 @@ export const useMessages = (chatId?: string) => {
     queryFn: async () => {
       if (!chatId) return [];
       
-      const response = await get<Message[]>(`/api/chat/messages?id=${chatId}&page=1&limit=10`);
+      const response = await get<Message[]>(`/api/chat/messages?id=${chatId}&limit=50`);
       
       if (!response.success) {
         throw new Error(response.error || 'Erreur lors de la récupération des messages');

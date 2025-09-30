@@ -10,8 +10,8 @@ import { createQueryKeyStore } from '@lukemorales/query-key-factory';
 import type { PaginationParams, PaginatedResponse, NewChat, NewChatPayload, NewMessage } from '@/types';
 
 interface BasePaginationParams {
-  page?: number;
-  page_size?: number;
+  limit?: number;
+  start_id?: number;
   search?: string;
 }
 
@@ -19,11 +19,11 @@ const createPaginatedQueryFn = <T, P extends PaginationParams>(
   fetcher: (params: P) => Promise<PaginatedResponse<T>>,
   params?: P,
 ) => {
-  return ({ pageParam = 1 }: { pageParam: number }) => {
+  return ({ pageParam }: { pageParam?: number }) => {
     return fetcher({
       ...(params as P),
-      page: pageParam,
       limit: DEFAULT_PAGE_SIZE,
+      ...(pageParam && { start_id: pageParam }),
     });
   };
 };

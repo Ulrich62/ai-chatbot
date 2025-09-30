@@ -73,11 +73,11 @@ export const useChat = ({ enabled = true, search }: UseChatOptions = {}) => {
     error,
   } = useInfiniteQuery({
     queryKey: ['chat', 'history', { search }],
-    queryFn: async ({ pageParam = 1 }: { pageParam: number }) => {
+    queryFn: async ({ pageParam }: { pageParam?: number }) => {
       const pageSize = DEFAULT_PAGE_SIZE;
       const params = new URLSearchParams({
-        page: pageParam.toString(),
         limit: pageSize.toString(),
+        ...(pageParam && { start_id: pageParam.toString() }),
         ...(search && { search }),
       });
 
@@ -90,12 +90,14 @@ export const useChat = ({ enabled = true, search }: UseChatOptions = {}) => {
       return response.data!;
     },
     getNextPageParam: (lastPage: PaginatedResponse<Chat>) => {
-      if (lastPage.page < lastPage.pages) {
-        return lastPage.page + 1;
+      if (lastPage.has_more && lastPage.items.length > 0) {
+        // Utiliser l'ID du dernier chat comme start_id pour la prochaine requête
+        const lastChat = lastPage.items[lastPage.items.length - 1];
+        return lastChat.id;
       }
       return undefined;
     },
-    initialPageParam: 1,
+    initialPageParam: undefined,
     enabled,
   });
 

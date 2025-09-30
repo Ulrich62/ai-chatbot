@@ -31,7 +31,7 @@ export interface LoginResponse {
 
 // ===== CHAT TYPES =====
 export interface Message {
-  id: string;
+  id: number;
   uuid?: string;
   content: string;
   is_user: boolean;
@@ -48,7 +48,7 @@ export interface NewMessage {
 }
 
 export interface Chat {
-  id: string;
+  id: number;
   uuid?: string;
   title: string;
   messages?: Message[];
@@ -163,15 +163,12 @@ export interface ApiResponse<T = unknown> {
 
 export interface PaginatedResponse<T> {
   items: T[];
-  total: number;
-  page: number;
-  limit: number;
-  pages: number;
+  has_more: boolean;
 }
 
 export interface PaginationParams {
-  page?: number;
   limit?: number;
+  start_id?: number;
   search?: string;
 }
 
