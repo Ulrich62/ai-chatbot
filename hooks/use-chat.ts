@@ -73,7 +73,7 @@ export const useChat = ({ enabled = true, search }: UseChatOptions = {}) => {
     error,
   } = useInfiniteQuery({
     queryKey: ['chat', 'history', { search }],
-    queryFn: async ({ pageParam }: { pageParam?: number }) => {
+    queryFn: async ({ pageParam }: { pageParam?: number | string }) => {
       const pageSize = DEFAULT_PAGE_SIZE;
       const params = new URLSearchParams({
         limit: pageSize.toString(),

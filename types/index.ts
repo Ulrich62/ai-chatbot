@@ -31,7 +31,7 @@ export interface LoginResponse {
 
 // ===== CHAT TYPES =====
 export interface Message {
-  id: number;
+  id: number | string;
   uuid?: string;
   content: string;
   is_user: boolean;
@@ -48,7 +48,7 @@ export interface NewMessage {
 }
 
 export interface Chat {
-  id: number;
+  id: number | string;
   uuid?: string;
   title: string;
   messages?: Message[];
