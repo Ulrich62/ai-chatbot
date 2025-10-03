@@ -1,9 +1,42 @@
 import { type NextRequest, NextResponse } from 'next/server';
+import { isTokenExpired } from '@/utils/jwt-decoder';
+
+async function refreshTokenIfNeeded(req: NextRequest): Promise<string | null> {
+  const token = req.cookies.get('token')?.value;
+  const refreshToken = req.cookies.get('refreshToken')?.value;
+
+  if (!token || !refreshToken) return token || null;
+
+  // Si le token est expiré, tenter un refresh
+  if (isTokenExpired(token)) {
+    try {
+      const refreshResponse = await fetch(`${req.nextUrl.origin}/api/auth/refresh`, {
+        method: 'GET',
+        headers: { 
+          'Cookie': req.headers.get('cookie') || ''
+        },
+      });
+      
+      if (refreshResponse.ok) {
+        const newCookies = refreshResponse.headers.getSetCookie();
+        const newTokenCookie = newCookies.find(cookie => cookie.startsWith('token='));
+        
+        if (newTokenCookie) {
+          return newTokenCookie.split(';')[0].split('=')[1];
+        }
+      }
+    } catch (error) {
+      console.error('[USER_INFO_API] Erreur lors du refresh:', error);
+    }
+  }
+
+  return token;
+}
 
 export async function GET(req: NextRequest) {
   try {
-    // Récupérer le token depuis les cookies
-    const token = req.cookies.get('token')?.value;
+    const token = await refreshTokenIfNeeded(req);
+    
     if (!token) {
       return NextResponse.json({ error: 'Token manquant' }, { status: 401 });
     }

@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server';
 
-export async function POST(req: NextRequest) {
+export async function GET(req: NextRequest) {
   try {
     // Récupérer le refresh token depuis les cookies
     const refreshToken = req.cookies.get('refreshToken')?.value;

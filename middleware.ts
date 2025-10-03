@@ -28,10 +28,9 @@ export async function middleware(req: NextRequest) {
     
     try {
       const refreshResponse = await fetch(`${req.nextUrl.origin}/api/auth/refresh`, {
-        method: 'POST',
+        method: 'GET',
         headers: { 
-          'Cookie': req.headers.get('cookie') || '',
-          'Content-Type': 'application/json'
+          'Cookie': req.headers.get('cookie') || ''
         },
       });
       
@@ -62,10 +61,9 @@ export async function middleware(req: NextRequest) {
       
       try {
         const refreshResponse = await fetch(`${req.nextUrl.origin}/api/auth/refresh`, {
-          method: 'POST',
+          method: 'GET',
           headers: { 
-            'Cookie': req.headers.get('cookie') || '',
-            'Content-Type': 'application/json'
+            'Cookie': req.headers.get('cookie') || ''
           },
         });
         

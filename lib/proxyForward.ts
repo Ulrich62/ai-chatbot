@@ -10,10 +10,9 @@ export async function proxyForward(req: NextRequest, targetUrl: string) {
     if (token && refreshToken && isTokenExpired(token)) {
       try {
         const refreshResponse = await fetch(`${req.nextUrl.origin}/api/auth/refresh`, {
-          method: 'POST',
+          method: 'GET',
           headers: { 
-            'Cookie': req.headers.get('cookie') || '',
-            'Content-Type': 'application/json'
+            'Cookie': req.headers.get('cookie') || ''
           },
         });
         
@@ -78,10 +77,9 @@ export async function proxyForward(req: NextRequest, targetUrl: string) {
     if (backendRes.status === 401 && refreshToken && token) {
       try {
         const refreshResponse = await fetch(`${req.nextUrl.origin}/api/auth/refresh`, {
-          method: 'POST',
+          method: 'GET',
           headers: { 
-            'Cookie': req.headers.get('cookie') || '',
-            'Content-Type': 'application/json'
+            'Cookie': req.headers.get('cookie') || ''
           },
         });
         

@@ -13,10 +13,9 @@ async function refreshTokenIfNeeded(req: NextRequest): Promise<string | null> {
   if (isTokenExpired(token)) {
     try {
       const refreshResponse = await fetch(`${req.nextUrl.origin}/api/auth/refresh`, {
-        method: 'POST',
+        method: 'GET',
         headers: { 
-          'Cookie': req.headers.get('cookie') || '',
-          'Content-Type': 'application/json'
+          'Cookie': req.headers.get('cookie') || ''
         },
       });
       

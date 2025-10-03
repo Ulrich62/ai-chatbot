@@ -140,12 +140,28 @@ export class AuthService {
    */
   async refreshToken(): Promise<boolean> {
     try {
+      // Vérifier si le refresh token existe avant de faire l'appel
+      const refreshToken = this.getRefreshToken();
+      if (!refreshToken) {
+        console.warn('[AuthService] No refresh token available, redirecting to login');
+        // Rediriger vers la page de login
+        if (typeof window !== 'undefined') {
+          window.location.href = '/login';
+        }
+        return false;
+      }
+
       const response = await fetch('/api/auth/refresh', {
-        method: 'POST',
+        method: 'GET',
         credentials: 'include',
       });
 
       if (!response.ok) {
+        // Si le refresh échoue, rediriger vers login
+        console.warn('[AuthService] Token refresh failed, redirecting to login');
+        if (typeof window !== 'undefined') {
+          window.location.href = '/login';
+        }
         return false;
       }
 
@@ -158,6 +174,10 @@ export class AuthService {
       return true;
     } catch (error) {
       console.error('[AuthService] Token refresh error:', error);
+      // En cas d'erreur, rediriger vers login
+      if (typeof window !== 'undefined') {
+        window.location.href = '/login';
+      }
       return false;
     }
   }
@@ -173,18 +193,28 @@ export class AuthService {
 
       if (!response.ok) {
         if (response.status === 401) {
-          // Try to refresh token
-          const refreshSuccess = await this.refreshToken();
-          if (refreshSuccess) {
-            // Retry getting user
-            const retryResponse = await fetch('/api/auth', {
-              credentials: 'include',
-            });
-            if (retryResponse.ok) {
-              const data = await retryResponse.json();
-              return data.user;
+          // Vérifier si le refresh token existe avant de tenter un refresh
+          const refreshToken = this.getRefreshToken();
+          if (refreshToken) {
+            // Try to refresh token
+            const refreshSuccess = await this.refreshToken();
+            if (refreshSuccess) {
+              // Retry getting user
+              const retryResponse = await fetch('/api/auth', {
+                credentials: 'include',
+              });
+              if (retryResponse.ok) {
+                const data = await retryResponse.json();
+                return data.user;
+              }
             }
-          }
+            } else {
+              console.warn('[AuthService] No refresh token available for getCurrentUser retry, redirecting to login');
+              // Rediriger vers la page de login
+              if (typeof window !== 'undefined') {
+                window.location.href = '/login';
+              }
+            }
         }
         return null;
       }
