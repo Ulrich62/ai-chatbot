@@ -6,7 +6,7 @@ import { useMessageStore } from "@/store/message-store";
 import { useStreaming } from "./use-streaming";
 import { STREAM_STATUS } from "@/enums";
 import { sendMessage as sendMessageApi } from "@/apis/chat-api";
-import { useUserInfo } from "./use-user-info";
+import { useAuth } from "./use-auth";
 import { useApi } from "./use-api";
 import type { Message, NewMessage } from "@/types";
 
@@ -18,7 +18,7 @@ export const useMessages = (chatId?: string) => {
     currentStreamingMessageId,
   } = useMessageStore();
   const { startStreaming } = useStreaming();
-  const { userInfo } = useUserInfo();
+  const { user } = useAuth();
   const { get } = useApi();
 
   const { isLoading: isMessagesLoading, data: messages } = useQuery<Message[]>({
@@ -45,13 +45,13 @@ export const useMessages = (chatId?: string) => {
   });
 
   const sendMessage = async (message: NewMessage) => {
-    if (!chatId || !userInfo) return;
+    if (!chatId || !user) return;
 
     try {
       const payload = {
         chatId,
         messages: [message],
-        userInfo,
+        user,
         existingMessages: allMessages,
       };
       await startStreaming(

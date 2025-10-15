@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server';
+import { AUTH_CONFIG } from '@/config/constants';
 
 export async function GET(req: NextRequest) {
   try {
@@ -39,21 +40,21 @@ export async function GET(req: NextRequest) {
     // Configuration des cookies avec les nouveaux tokens
     const response = NextResponse.json({ success: true });
     
-    response.cookies.set('token', accessToken, {
-      httpOnly: true,
-      sameSite: 'lax',
-      secure: process.env.NODE_ENV === 'production',
+    response.cookies.set(AUTH_CONFIG.tokenCookieName, accessToken, {
+      httpOnly: AUTH_CONFIG.httpOnly,
+      sameSite: AUTH_CONFIG.sameSite,
+      secure: AUTH_CONFIG.secure,
       path: '/',
-      maxAge: 60 * 60 * 24 * 7, // 7 jours
+      maxAge: AUTH_CONFIG.tokenMaxAge,
     });
 
     if (newRefreshToken) {
-      response.cookies.set('refreshToken', newRefreshToken, {
-        httpOnly: true,
-        sameSite: 'lax',
-        secure: process.env.NODE_ENV === 'production',
+      response.cookies.set(AUTH_CONFIG.refreshTokenCookieName, newRefreshToken, {
+        httpOnly: AUTH_CONFIG.httpOnly,
+        sameSite: AUTH_CONFIG.sameSite,
+        secure: AUTH_CONFIG.secure,
         path: '/',
-        maxAge: 60 * 60 * 24 * 30, // 30 jours
+        maxAge: AUTH_CONFIG.refreshTokenMaxAge,
       });
     }
 

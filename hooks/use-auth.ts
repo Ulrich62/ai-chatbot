@@ -32,12 +32,25 @@ export function useAuth(): UseAuthReturn {
 
   const refreshAuth = useCallback(async (): Promise<boolean> => {
     try {
-      return await authService.refreshToken();
+      // With httpOnly cookies, we need to make a server-side request
+      const response = await fetch('/api/auth/refresh', {
+        method: 'GET',
+        credentials: 'include',
+      });
+      
+      if (response.ok) {
+        // Force a refetch of user data after successful refresh
+        refetch();
+        return true;
+      } else {
+        console.warn('[USE_AUTH] Token refresh failed');
+        return false;
+      }
     } catch (error) {
       console.error('[USE_AUTH] Token refresh error:', error);
       return false;
     }
-  }, []);
+  }, [refetch]);
 
   const login = useCallback(async (credentials: LoginRequest) => {
     try {

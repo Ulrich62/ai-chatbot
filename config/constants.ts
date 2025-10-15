@@ -17,10 +17,11 @@ export const API_CONFIG = {
 export const AUTH_CONFIG = {
   tokenCookieName: 'token',
   refreshTokenCookieName: 'refreshToken',
-  tokenMaxAge: 60 * 60 * 24 * 7, // 7 days
-  refreshTokenMaxAge: 60 * 60 * 24 * 30, // 30 days
+  tokenMaxAge: 60 * 60 * 24 * 7, // 7 days (in seconds)
+  refreshTokenMaxAge: 60 * 60 * 24 * 30, // 30 days (in seconds)
   secure: process.env.NODE_ENV === 'production',
   sameSite: 'lax' as const,
+  httpOnly: true, // Cookies should be httpOnly for security
 } as const;
 
 // Chat Configuration

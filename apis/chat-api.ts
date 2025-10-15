@@ -58,12 +58,12 @@ export const getChat = async (id: string) => {
 export const sendMessage = async (payload: {
   chatId: string;
   messages: NewMessage[];
-  userInfo: any;
+  user: any;
   existingMessages: Message[];
 }) => {
   // Construire le contexte avec les messages existants et le nouveau message
   const context = buildConversationContext(payload.existingMessages, payload.messages[0]);
-  const user = buildUserInfo(payload.userInfo);
+  const user = buildUserInfo(payload.user);
 
   const requestPayload = {
     messages: payload.messages,

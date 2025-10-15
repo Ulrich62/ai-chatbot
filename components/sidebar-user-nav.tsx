@@ -91,13 +91,20 @@ export function SidebarUserNav() {
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild data-testid="user-nav-item-auth">
-              <button
-                type="button"
+              <div
                 className="w-full cursor-pointer"
                 onClick={handleAuthAction}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    handleAuthAction();
+                  }
+                }}
               >
                 {isGuest ? "Se connecter" : "Se déconnecter"}
-              </button>
+              </div>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

@@ -1,9 +1,10 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { isTokenExpired } from '@/utils/jwt-decoder';
+import { AUTH_CONFIG } from '@/config/constants';
 
 async function refreshTokenIfNeeded(req: NextRequest): Promise<string | null> {
-  const token = req.cookies.get('token')?.value;
-  const refreshToken = req.cookies.get('refreshToken')?.value;
+  const token = req.cookies.get(AUTH_CONFIG.tokenCookieName)?.value;
+  const refreshToken = req.cookies.get(AUTH_CONFIG.refreshTokenCookieName)?.value;
 
   if (!token || !refreshToken) return token || null;
 
@@ -19,7 +20,7 @@ async function refreshTokenIfNeeded(req: NextRequest): Promise<string | null> {
       
       if (refreshResponse.ok) {
         const newCookies = refreshResponse.headers.getSetCookie();
-        const newTokenCookie = newCookies.find(cookie => cookie.startsWith('token='));
+        const newTokenCookie = newCookies.find(cookie => cookie.startsWith(`${AUTH_CONFIG.tokenCookieName}=`));
         
         if (newTokenCookie) {
           return newTokenCookie.split(';')[0].split('=')[1];

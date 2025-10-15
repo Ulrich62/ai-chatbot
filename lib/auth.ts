@@ -16,9 +16,16 @@ export class AuthService {
 
   /**
    * Get token from cookies
+   * Note: This method won't work with httpOnly cookies
    */
   getToken(): string | null {
     if (typeof document === 'undefined') return null;
+    
+    // If using httpOnly cookies, we can't access them from client-side
+    if (AUTH_CONFIG.httpOnly) {
+      console.warn('[AuthService] getToken called but cookies are httpOnly. Use server-side authentication check.');
+      return null;
+    }
     
     const cookies = document.cookie.split(';');
     const tokenCookie = cookies.find(cookie => 
@@ -30,9 +37,16 @@ export class AuthService {
 
   /**
    * Get refresh token from cookies
+   * Note: This method won't work with httpOnly cookies
    */
   getRefreshToken(): string | null {
     if (typeof document === 'undefined') return null;
+    
+    // If using httpOnly cookies, we can't access them from client-side
+    if (AUTH_CONFIG.httpOnly) {
+      console.warn('[AuthService] getRefreshToken called but cookies are httpOnly. Use server-side authentication check.');
+      return null;
+    }
     
     const cookies = document.cookie.split(';');
     const refreshTokenCookie = cookies.find(cookie => 
@@ -44,24 +58,33 @@ export class AuthService {
 
   /**
    * Set authentication tokens in cookies
+   * Note: This method is deprecated for httpOnly cookies. 
+   * Tokens should be set server-side via API responses.
    */
   setTokens(tokens: AuthTokens): void {
     if (typeof document === 'undefined') return;
 
-    const cookieOptions = [
-      `path=/`,
-      `max-age=${AUTH_CONFIG.tokenMaxAge}`,
-      `samesite=${AUTH_CONFIG.sameSite}`,
-    ];
-
-    if (AUTH_CONFIG.secure) {
-      cookieOptions.push('secure');
-    }
-
-    document.cookie = `${AUTH_CONFIG.tokenCookieName}=${tokens.access_token}; ${cookieOptions.join('; ')}`;
+    // Since we're using httpOnly cookies, we can't set them from client-side
+    // This method is kept for backward compatibility but should not be used
+    console.warn('[AuthService] setTokens called on client-side. Tokens should be set server-side.');
     
-    if (tokens.refresh_token) {
-      document.cookie = `${AUTH_CONFIG.refreshTokenCookieName}=${tokens.refresh_token}; ${cookieOptions.join('; ')}`;
+    // For non-httpOnly cookies (development only), we can still set them
+    if (!AUTH_CONFIG.httpOnly) {
+      const cookieOptions = [
+        `path=/`,
+        `max-age=${AUTH_CONFIG.tokenMaxAge}`,
+        `samesite=${AUTH_CONFIG.sameSite}`,
+      ];
+
+      if (AUTH_CONFIG.secure) {
+        cookieOptions.push('secure');
+      }
+
+      document.cookie = `${AUTH_CONFIG.tokenCookieName}=${tokens.access_token}; ${cookieOptions.join('; ')}`;
+      
+      if (tokens.refresh_token) {
+        document.cookie = `${AUTH_CONFIG.refreshTokenCookieName}=${tokens.refresh_token}; ${cookieOptions.join('; ')}`;
+      }
     }
   }
 
@@ -77,8 +100,15 @@ export class AuthService {
 
   /**
    * Check if user is authenticated
+   * Note: With httpOnly cookies, this method is not reliable on client-side
    */
   isAuthenticated(): boolean {
+    // With httpOnly cookies, we can't reliably check authentication from client-side
+    // This should be handled by the server-side middleware
+    if (AUTH_CONFIG.httpOnly) {
+      console.warn('[AuthService] isAuthenticated called but cookies are httpOnly. Use server-side authentication check.');
+      return false; // Always return false to force server-side check
+    }
     return !!this.getToken();
   }
 
@@ -102,7 +132,11 @@ export class AuthService {
 
       const data = await response.json();
       
-      if (data.tokens) {
+      // With httpOnly cookies, tokens are set server-side
+      // No need to call setTokens() as cookies are handled by the server
+      if (AUTH_CONFIG.httpOnly) {
+        console.log('[AuthService] Login successful, cookies set server-side');
+      } else if (data.tokens) {
         this.setTokens(data.tokens);
       }
 
@@ -140,17 +174,8 @@ export class AuthService {
    */
   async refreshToken(): Promise<boolean> {
     try {
-      // Vérifier si le refresh token existe avant de faire l'appel
-      const refreshToken = this.getRefreshToken();
-      if (!refreshToken) {
-        console.warn('[AuthService] No refresh token available, redirecting to login');
-        // Rediriger vers la page de login
-        if (typeof window !== 'undefined') {
-          window.location.href = '/login';
-        }
-        return false;
-      }
-
+      // With httpOnly cookies, we can't check refresh token from client-side
+      // Just make the request and let the server handle it
       const response = await fetch('/api/auth/refresh', {
         method: 'GET',
         credentials: 'include',
@@ -167,7 +192,11 @@ export class AuthService {
 
       const data = await response.json();
       
-      if (data.tokens) {
+      // With httpOnly cookies, tokens are set server-side
+      // No need to call setTokens() as cookies are handled by the server
+      if (AUTH_CONFIG.httpOnly) {
+        console.log('[AuthService] Token refresh successful, cookies set server-side');
+      } else if (data.tokens) {
         this.setTokens(data.tokens);
       }
 
@@ -193,28 +222,12 @@ export class AuthService {
 
       if (!response.ok) {
         if (response.status === 401) {
-          // Vérifier si le refresh token existe avant de tenter un refresh
-          const refreshToken = this.getRefreshToken();
-          if (refreshToken) {
-            // Try to refresh token
-            const refreshSuccess = await this.refreshToken();
-            if (refreshSuccess) {
-              // Retry getting user
-              const retryResponse = await fetch('/api/auth', {
-                credentials: 'include',
-              });
-              if (retryResponse.ok) {
-                const data = await retryResponse.json();
-                return data.user;
-              }
-            }
-            } else {
-              console.warn('[AuthService] No refresh token available for getCurrentUser retry, redirecting to login');
-              // Rediriger vers la page de login
-              if (typeof window !== 'undefined') {
-                window.location.href = '/login';
-              }
-            }
+          // With httpOnly cookies, we can't check refresh token from client-side
+          // The server-side middleware should handle token refresh automatically
+          console.warn('[AuthService] Unauthorized response, server should handle token refresh');
+          if (typeof window !== 'undefined') {
+            window.location.href = '/login';
+          }
         }
         return null;
       }

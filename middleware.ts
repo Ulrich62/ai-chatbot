@@ -1,12 +1,13 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { isTokenExpired } from '@/utils/jwt-decoder';
 import { logger } from '@/lib/logger';
+import { AUTH_CONFIG } from '@/config/constants';
 
 export async function middleware(req: NextRequest) {
   const pathname = req.nextUrl.pathname;
   
-  const token = req.cookies.get('token')?.value;
-  const refreshToken = req.cookies.get('refreshToken')?.value;
+  const token = req.cookies.get(AUTH_CONFIG.tokenCookieName)?.value;
+  const refreshToken = req.cookies.get(AUTH_CONFIG.refreshTokenCookieName)?.value;
   const isLoginPage = pathname.startsWith('/login');
   const isApi = pathname.startsWith('/api');
   const isStatic = pathname.startsWith('/_next') || pathname === '/favicon.ico';
