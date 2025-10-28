@@ -18,6 +18,7 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 import { useMessages } from "@/hooks/use-messages";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { BetaIndicator } from "@/components/beta-indicator";
 
 export function AppSidebar() {
   const { clearMessages } = useMessages();
@@ -59,14 +60,17 @@ export function AppSidebar() {
               />
             </button>
             {isMobile ? (
-              <Button
-                variant="ghost"
-                type="button"
-                className="p-2 h-fit"
-                onClick={handleNewChat}
-              >
-                <PlusIcon />
-              </Button>
+              <div className="flex items-center gap-2">
+                <BetaIndicator />
+                <Button
+                  variant="ghost"
+                  type="button"
+                  className="p-2 h-fit"
+                  onClick={handleNewChat}
+                >
+                  <PlusIcon />
+                </Button>
+              </div>
             ) : (
               <Tooltip>
                 <TooltipTrigger asChild>
