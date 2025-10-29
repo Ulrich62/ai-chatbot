@@ -1,6 +1,8 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { isTokenExpired } from '@/utils/jwt-decoder';
 
+// Configuration des APIs
+const BGDS_API_BASE = process.env.NEXT_PUBLIC_BGDS_API_BASE_URL;
 const RAG_API_BASE = process.env.NEXT_PUBLIC_RAG_API_BASE_URL;
 
 async function refreshTokenIfNeeded(req: NextRequest): Promise<string | null> {
@@ -35,6 +37,7 @@ async function refreshTokenIfNeeded(req: NextRequest): Promise<string | null> {
   return token;
 }
 
+// GET /api/chat/messages - Appel direct BGDS (réplique de get_chat_messages)
 export async function GET(req: NextRequest) {
   try {
     const token = await refreshTokenIfNeeded(req);
@@ -43,7 +46,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Token manquant' }, { status: 401 });
     }
 
-    // Récupérer l'ID du chat et les paramètres de pagination depuis les query params
+    // Récupérer l'ID du chat et les paramètres de pagination
     const url = new URL(req.url);
     const chatId = url.searchParams.get('id');
     
@@ -51,7 +54,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'ID du chat manquant' }, { status: 400 });
     }
 
-    // Construire l'URL avec les paramètres de pagination
+    // Construire les paramètres pour l'API BGDS
     const searchParams = new URLSearchParams();
     if (url.searchParams.get('limit')) {
       searchParams.set('limit', url.searchParams.get('limit')!);
@@ -61,8 +64,9 @@ export async function GET(req: NextRequest) {
     }
     
     const queryString = searchParams.toString();
-    const targetUrl = `${RAG_API_BASE}/messages/chat/${chatId}${queryString ? `?${queryString}` : ''}`;
+    const targetUrl = `${BGDS_API_BASE}/ia_assistant/chats/${chatId}/messages${queryString ? `?${queryString}` : ''}`;
 
+    // Appel direct à l'API BGDS (réplique de external_message_service.get_messages)
     const response = await fetch(targetUrl, {
       method: 'GET',
       headers: {
@@ -77,7 +81,17 @@ export async function GET(req: NextRequest) {
     }
 
     const data = await response.json();
-    return NextResponse.json(data);
+    
+    // Transformer la réponse pour correspondre au format attendu par le frontend
+    const transformedData = data.messages.map((message: any) => ({
+      id: message.id,
+      uuid: message.uuid,
+      content: message.content,
+      is_user: Boolean(message.isUser),
+      created: message.created
+    }));
+
+    return NextResponse.json(transformedData);
 
   } catch (error) {
     console.error('[MESSAGES_API] Erreur inattendue:', error);
@@ -85,6 +99,7 @@ export async function GET(req: NextRequest) {
   }
 }
 
+// POST /api/chat/messages - Proxy vers l'API de production
 export async function POST(req: NextRequest) {
   try {
     const token = await refreshTokenIfNeeded(req);

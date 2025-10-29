@@ -1,60 +1,35 @@
-import { jwtDecode } from "jwt-decode";
-
-interface JWTPayload {
-  [key: string]: any;
-  exp?: number;
-  iat?: number;
-}
+import jwt from 'jsonwebtoken';
 
 /**
- * Decodes a JWT token without verification
- * @param token - The JWT token string to decode
- * @returns An object containing the decoded header and payload, or null if invalid
- */
-export function decodeJWT(token: string): JWTPayload | null {
-  try {
-    const payload = jwtDecode(token);
-    return payload;
-  } catch (error) {
-    return null;
-  }
-}
-
-/**
- * Checks if a JWT token is expired
- * @param token - The JWT token string to check
- * @returns true if the token is expired, false otherwise
+ * Vérifie si un token JWT est expiré
+ * @param token - Token JWT à vérifier
+ * @returns true si le token est expiré, false sinon
  */
 export function isTokenExpired(token: string): boolean {
   try {
-    const payload = decodeJWT(token);
-    if (!payload || !payload.exp) {
-      return true; // Consider invalid tokens as expired
+    const decoded = jwt.decode(token) as jwt.JwtPayload;
+    if (!decoded || !decoded.exp) {
+      return true; // Token invalide ou sans expiration
     }
     
-    // exp is in seconds, Date.now() is in milliseconds
     const currentTime = Math.floor(Date.now() / 1000);
-    return payload.exp < currentTime;
+    return decoded.exp < currentTime;
   } catch (error) {
-    return true; // Consider invalid tokens as expired
+    console.warn('[JWT_DECODER] Erreur lors du décodage du token:', error);
+    return true; // En cas d'erreur, considérer comme expiré
   }
 }
 
 /**
- * Gets the expiration time of a JWT token
- * @param token - The JWT token string
- * @returns The expiration time in milliseconds, or null if invalid
+ * Décode un token JWT et retourne les données
+ * @param token - Token JWT à décoder
+ * @returns Données décodées ou null si invalide
  */
-export function getTokenExpiration(token: string): number | null {
+export function decodeToken(token: string): jwt.JwtPayload | null {
   try {
-    const payload = decodeJWT(token);
-    if (!payload || !payload.exp) {
-      return null;
-    }
-    
-    // exp is in seconds, convert to milliseconds
-    return payload.exp * 1000;
+    return jwt.decode(token) as jwt.JwtPayload;
   } catch (error) {
+    console.warn('[JWT_DECODER] Erreur lors du décodage:', error);
     return null;
   }
 }

@@ -1,21 +1,12 @@
-import { NextResponse } from 'next/server';
-import { AUTH_CONFIG } from '@/config/constants';
+import { NextRequest, NextResponse } from 'next/server';
 
-export async function POST() {
-  const response = NextResponse.json({ success: true });
-  response.cookies.set(AUTH_CONFIG.tokenCookieName, '', { 
-    path: '/', 
-    maxAge: 0,
-    httpOnly: AUTH_CONFIG.httpOnly,
-    sameSite: AUTH_CONFIG.sameSite,
-    secure: AUTH_CONFIG.secure,
-  });
-  response.cookies.set(AUTH_CONFIG.refreshTokenCookieName, '', { 
-    path: '/', 
-    maxAge: 0,
-    httpOnly: AUTH_CONFIG.httpOnly,
-    sameSite: AUTH_CONFIG.sameSite,
-    secure: AUTH_CONFIG.secure,
-  });
-  return response;
+export async function POST(req: NextRequest) {
+  try {
+    // Rediriger vers le logout SSO
+    return NextResponse.redirect(new URL('/api/auth/sso/logout', req.url));
+
+  } catch (err) {
+    console.error('[SIGNOUT] Erreur inattendue:', err);
+    return NextResponse.json({ error: 'Erreur interne du serveur' }, { status: 500 });
+  }
 } 

@@ -1,6 +1,8 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { isTokenExpired } from '@/utils/jwt-decoder';
 
+// Configuration des APIs
+const BGDS_API_BASE = process.env.NEXT_PUBLIC_BGDS_API_BASE_URL;
 const RAG_API_BASE = process.env.NEXT_PUBLIC_RAG_API_BASE_URL;
 
 async function refreshTokenIfNeeded(req: NextRequest): Promise<string | null> {
@@ -35,6 +37,7 @@ async function refreshTokenIfNeeded(req: NextRequest): Promise<string | null> {
   return token;
 }
 
+// GET /api/chat - Appel direct BGDS (réplique de get_user_chats)
 export async function GET(req: NextRequest) {
   try {
     const token = await refreshTokenIfNeeded(req);
@@ -43,11 +46,22 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Token manquant' }, { status: 401 });
     }
 
-    // Construire l'URL avec les query params
+    // Récupérer les paramètres de pagination et filtres
     const url = new URL(req.url);
-    const search = url.search;
-    const targetUrl = `${RAG_API_BASE}/chats${search}`;
+    const limit = url.searchParams.get('limit');
+    const start_id = url.searchParams.get('start_id');
+    const search = url.searchParams.get('search');
 
+    // Construire les paramètres pour l'API BGDS
+    const searchParams = new URLSearchParams();
+    if (limit) searchParams.set('limit', limit);
+    if (start_id) searchParams.set('start_id', start_id);
+    if (search) searchParams.set('search', search);
+    
+    const queryString = searchParams.toString();
+    const targetUrl = `${BGDS_API_BASE}/ia_assistant/chats${queryString ? `?${queryString}` : ''}`;
+
+    // Appel direct à l'API BGDS (réplique de external_chat_service.get_chats)
     const response = await fetch(targetUrl, {
       method: 'GET',
       headers: {
@@ -62,7 +76,19 @@ export async function GET(req: NextRequest) {
     }
 
     const data = await response.json();
-    return NextResponse.json(data);
+    
+    // Transformer la réponse pour correspondre au format attendu par le frontend
+    const transformedData = {
+      items: data.chats.map((chat: any) => ({
+        id: chat.id,
+        uuid: chat.uuid,
+        title: chat.title,
+        created: chat.created
+      })),
+      has_more: data.has_more
+    };
+
+    return NextResponse.json(transformedData);
 
   } catch (error) {
     console.error('[CHAT_API] Erreur inattendue:', error);
@@ -70,6 +96,7 @@ export async function GET(req: NextRequest) {
   }
 }
 
+// POST /api/chat - Proxy vers l'API de production
 export async function POST(req: NextRequest) {
   try {
     const token = await refreshTokenIfNeeded(req);
