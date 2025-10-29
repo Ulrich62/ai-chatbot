@@ -1,6 +1,6 @@
-# Guide de Déploiement sur VPS
+# Guide de Déploiement Docker sur VPS
 
-Ce guide explique comment configurer le déploiement automatique de l'application ai-chatbot sur le VPS.
+Ce guide explique comment configurer le déploiement automatique de l'application ai-chatbot sur le VPS avec Docker.
 
 ## 📋 Prérequis
 
@@ -16,46 +16,38 @@ Ce guide explique comment configurer le déploiement automatique de l'applicatio
 ssh denemlabs@65.21.233.153
 ```
 
-### 2. Télécharger et exécuter le script de configuration
+### 2. Installer Docker
 
 ```bash
-# Télécharger le script depuis GitHub
-curl -o setup-vps.sh https://raw.githubusercontent.com/Ulrich62/ai-chatbot/dev/scripts/setup-vps.sh
+# Installation de Docker
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh get-docker.sh
+rm get-docker.sh
 
-# Rendre le script exécutable
-chmod +x setup-vps.sh
+# Ajouter l'utilisateur au groupe docker
+sudo usermod -aG docker $USER
 
-# Exécuter le script
-./setup-vps.sh
+# Installer Docker Compose
+sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+
+# Redémarrer la session SSH pour que les permissions prennent effet
+exit
 ```
-
-Le script va :
-- ✅ Installer Node.js 20
-- ✅ Installer pnpm 9.12.3
-- ✅ Installer PM2
-- ✅ Installer nginx (reverse proxy)
-- ✅ Configurer le firewall
-- ✅ Créer le répertoire de l'application
 
 ### 3. Vérifier l'installation
 
 ```bash
-# Vérifier Node.js
-node --version  # Doit afficher v20.x.x
+# Vérifier Docker
+docker --version
 
-# Vérifier pnpm
-pnpm --version  # Doit afficher 9.12.3
-
-# Vérifier PM2
-pm2 --version
-
-# Vérifier nginx
-nginx -v
+# Vérifier Docker Compose
+docker-compose --version
 ```
 
 ## 🔐 Configuration des Secrets GitHub
 
-Tous les secrets sont déjà configurés dans GitHub Actions :
+Les secrets suivants doivent être configurés dans GitHub Actions :
 - ✅ `VPS_HOST`: 65.21.233.153
 - ✅ `VPS_USERNAME`: denemlabs
 - ✅ `VPS_SSH_KEY`: Clé SSH privée
@@ -73,56 +65,49 @@ Une fois le VPS configuré, le déploiement se fait automatiquement :
 ### Processus de déploiement
 
 Le workflow GitHub Actions va :
-1. ✅ Vérifier le code
-2. ✅ Installer les dépendances
-3. ✅ Exécuter le linting
-4. ✅ Build l'application
-5. ✅ Créer une archive de déploiement
-6. ✅ Uploader l'archive sur le VPS
-7. ✅ Extraire et installer les dépendances de production
-8. ✅ Configurer les variables d'environnement
-9. ✅ Démarrer l'application avec PM2
-10. ✅ Vérifier que l'application fonctionne
+1. ✅ Construire l'image Docker
+2. ✅ Pousser l'image vers GitHub Container Registry
+3. ✅ Se connecter au VPS
+4. ✅ Télécharger la nouvelle image
+5. ✅ Arrêter et supprimer l'ancien conteneur
+6. ✅ Démarrer le nouveau conteneur
+7. ✅ Vérifier que l'application fonctionne
 
 ## 🛠️ Commandes Utiles sur le VPS
 
 ```bash
 # Voir les logs de l'application
-pm2 logs ai-chatbot-dev
+docker logs ai-chatbot-dev
 
-# Voir le statut de l'application
-pm2 status
+# Voir le statut des conteneurs
+docker ps
 
 # Redémarrer l'application
-pm2 restart ai-chatbot-dev
+docker restart ai-chatbot-dev
 
 # Arrêter l'application
-pm2 stop ai-chatbot-dev
+docker stop ai-chatbot-dev
 
-# Voir les logs nginx
-sudo tail -f /var/log/nginx/error.log
-sudo tail -f /var/log/nginx/access.log
+# Voir les logs en temps réel
+docker logs -f ai-chatbot-dev
 
-# Redémarrer nginx
-sudo systemctl restart nginx
-
-# Vérifier que l'application répond
-curl http://localhost:3000
+# Accéder au shell du conteneur
+docker exec -it ai-chatbot-dev sh
 ```
 
 ## 🔍 Monitoring
 
-### PM2 Monitoring
+### Docker Monitoring
 
 ```bash
 # Vue d'ensemble
-pm2 monit
+docker stats
 
 # Informations détaillées
-pm2 show ai-chatbot-dev
+docker inspect ai-chatbot-dev
 
 # Logs en temps réel
-pm2 logs ai-chatbot-dev --lines 50
+docker logs -f ai-chatbot-dev --tail 50
 ```
 
 ### Vérification de l'application
@@ -131,8 +116,8 @@ pm2 logs ai-chatbot-dev --lines 50
 # Vérifier que le port 3000 écoute
 sudo netstat -tlnp | grep 3000
 
-# Vérifier les processus Node.js
-ps aux | grep node
+# Test HTTP
+curl http://localhost:3000
 ```
 
 ## 🔄 Rollback en cas de problème
@@ -142,53 +127,22 @@ Si un déploiement échoue :
 ```bash
 cd /home/denemlabs/ai-chatbot
 
-# Lister les backups disponibles
-ls -la .next.backup.*
+# Lister les images disponibles
+docker images | grep ai-chatbot
 
-# Restaurer un backup précédent
-pm2 stop ai-chatbot-dev
-rm -rf .next
-mv .next.backup.YYYYMMDD_HHMMSS .next
-pm2 restart ai-chatbot-dev
-```
-
-## 📝 Configuration Nginx (Optionnel)
-
-Si vous avez un domaine, modifiez `/etc/nginx/sites-available/ai-chatbot` :
-
-```nginx
-server {
-    listen 80;
-    server_name votre-domaine.com;
-    
-    location / {
-        proxy_pass http://localhost:3000;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_cache_bypass $http_upgrade;
-    }
-}
-```
-
-Puis rechargez nginx :
-```bash
-sudo nginx -t
-sudo systemctl reload nginx
+# Utiliser une image précédente
+docker stop ai-chatbot-dev
+docker rm ai-chatbot-dev
+docker run -d --name ai-chatbot-dev -p 3000:3000 --env-file .env.production <IMAGE_ID>
 ```
 
 ## 🐛 Dépannage
 
 ### L'application ne démarre pas
 
-1. Vérifier les logs : `pm2 logs ai-chatbot-dev`
-2. Vérifier les variables d'environnement : `cat /home/denemlabs/ai-chatbot/.env.production`
-3. Vérifier que Node.js et pnpm sont installés : `node --version && pnpm --version`
-4. Vérifier les permissions : `ls -la /home/denemlabs/ai-chatbot`
+1. Vérifier les logs : `docker logs ai-chatbot-dev`
+2. Vérifier les variables d'environnement : `docker exec ai-chatbot-dev env`
+3. Vérifier que Docker fonctionne : `docker ps`
 
 ### Erreur de connexion SSH
 
@@ -202,6 +156,5 @@ Vérifier les logs GitHub Actions pour voir où le build échoue
 
 En cas de problème, vérifier :
 1. Les logs GitHub Actions
-2. Les logs PM2 sur le VPS
-3. Les logs nginx
-4. Le statut de l'application : `pm2 status`
+2. Les logs Docker sur le VPS : `docker logs ai-chatbot-dev`
+3. Le statut de l'application : `docker ps`
