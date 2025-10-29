@@ -1,4 +1,5 @@
 import { SSOSignatureService } from './sso-signature';
+import type { NextRequest } from 'next/server';
 
 /**
  * Service SSO Office pour la gestion de l'authentification
@@ -18,10 +19,13 @@ export class SSOOfficeService {
   /**
    * Génère l'URL de callback pour les redirections POST d'Office
    * Conformément à la spécification SSO Office
+   * 
+   * @param request - Requête Next.js pour extraire l'URL dynamiquement
    * @returns URL de callback pour les redirections POST
    */
-  static generateCallbackUrl(): string {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+  static generateCallbackUrl(request: NextRequest): string {
+    const url = new URL(request.url);
+    const baseUrl = `${url.protocol}//${url.host}`;
     return `${baseUrl}/api/auth/sso/validate`;
   }
 
