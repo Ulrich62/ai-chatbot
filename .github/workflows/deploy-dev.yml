@@ -6,13 +6,13 @@ on:
   workflow_dispatch:
 
 env:
-  NODE_VERSION: '20'
-  PNPM_VERSION: '9.12.3'
+  NODE_VERSION: "20"
+  PNPM_VERSION: "9.12.3"
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -74,17 +74,18 @@ jobs:
           script: |
             # Create app directory if it doesn't exist
             mkdir -p /home/denemlabs/ai-chatbot
-            
+
             # Navigate to app directory
             cd /home/denemlabs/ai-chatbot
-            
+
             # Stop existing application if running
-            if pgrep -f "next start" > /dev/null; then
+            if pm2 list | grep -q "ai-chatbot-dev"; then
               echo "Stopping existing application..."
-              pkill -f "next start"
-              sleep 5
+              pm2 stop ai-chatbot-dev 2>/dev/null || true
+              pm2 delete ai-chatbot-dev 2>/dev/null || true
+              sleep 2
             fi
-            
+
             # Backup current deployment
             if [ -d ".next" ]; then
               echo "Backing up current deployment..."
@@ -110,18 +111,34 @@ jobs:
           port: 22
           script: |
             cd /home/denemlabs/ai-chatbot
-            
+
+            # Check if Node.js, pnpm and PM2 are installed
+            if ! command -v node &> /dev/null; then
+              echo "❌ Node.js is not installed. Please run the setup script first."
+              exit 1
+            fi
+
+            if ! command -v pnpm &> /dev/null; then
+              echo "❌ pnpm is not installed. Please run the setup script first."
+              exit 1
+            fi
+
+            if ! command -v pm2 &> /dev/null; then
+              echo "❌ PM2 is not installed. Please run the setup script first."
+              exit 1
+            fi
+
             # Extract new deployment
             echo "Extracting new deployment..."
             tar -xzf deployment.tar.gz
-            
+
             # Clean up archive
             rm deployment.tar.gz
-            
+
             # Install dependencies
             echo "Installing dependencies..."
             pnpm install --frozen-lockfile --prod
-            
+
             # Set environment variables
             echo "Setting up environment..."
             cat > .env.production << EOF
@@ -130,34 +147,34 @@ jobs:
             OFFICE_BASE_URL=${{ secrets.OFFICE_BASE_URL }}
             OFFICE_APP_NAME=${{ secrets.OFFICE_APP_NAME }}
             HTTP_SIGNATURE_SECRET=${{ secrets.HTTP_SIGNATURE_SECRET }}
-            
+
             # SSO Office Configuration
             NEXT_PUBLIC_OFFICE_BASE_URL=${{ secrets.NEXT_PUBLIC_OFFICE_BASE_URL }}
             NEXT_PUBLIC_OFFICE_APP_NAME=${{ secrets.NEXT_PUBLIC_OFFICE_APP_NAME }}
             JWT_SECRET=${{ secrets.JWT_SECRET }}
-            
+
             # Public variables
             NEXT_PUBLIC_APP_URL=${{ secrets.NEXT_PUBLIC_APP_URL }}
             NEXT_PUBLIC_BGDS_API_BASE_URL=${{ secrets.NEXT_PUBLIC_BGDS_API_BASE_URL }}
             NEXT_PUBLIC_RAG_API_BASE_URL=${{ secrets.NEXT_PUBLIC_RAG_API_BASE_URL }}
             PASSWORD_RESET_URL=${{ secrets.PASSWORD_RESET_URL }}
-            
+
             # Production settings
             NODE_ENV=production
             PORT=3000
             EOF
-            
+
             # Start application with PM2
             echo "Starting application with PM2..."
             pm2 delete ai-chatbot-dev 2>/dev/null || true
-            pm2 start npm --name "ai-chatbot-dev" -- start
-            pm2 save
-            pm2 startup
-            
+            cd /home/denemlabs/ai-chatbot
+            pm2 start npm --name "ai-chatbot-dev" -- start --update-env
+            pm2 save || true
+
             # Clean up old backups (keep last 3)
             echo "Cleaning up old backups..."
-            ls -dt .next.backup.* | tail -n +4 | xargs rm -rf 2>/dev/null || true
-            
+            ls -dt .next.backup.* 2>/dev/null | tail -n +4 | xargs rm -rf 2>/dev/null || true
+
             echo "Deployment completed successfully!"
 
       - name: Health check
@@ -170,7 +187,7 @@ jobs:
           script: |
             # Wait for application to start
             sleep 10
-            
+
             # Check if application is running
             if curl -f http://localhost:3000 > /dev/null 2>&1; then
               echo "✅ Application is running successfully!"
